@@ -14,13 +14,19 @@ class Player {
     if (!this.connection) return;
     if (!this.queue.length) return;
 
+    if (!fs.existsSync("./temp")) {
+      fs.mkdirSync("./temp");
+    }
+
     this.queue.forEach((song) => {
       const stream = ytdl(song.url, { filter: "audioonly" }).pipe(
-        fs.createWriteStream("song.mp3")
+        fs.createWriteStream(`./temp/${encodeURIComponent(song.title)}.mp3`)
       );
 
       stream.once("finish", () => {
-        this.connection?.play("song.mp3", { inlineVolume: true });
+        this.connection?.play(`./temp/${encodeURIComponent(song.title)}.mp3`, {
+          inlineVolume: true,
+        });
 
         if (this.queue.length > 1) {
           this.queue.shift();
