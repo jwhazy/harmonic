@@ -1,5 +1,6 @@
 import Command from "../types/Command";
 import embedCreate from "../utils/embedCreate";
+import { error } from "../utils/logger";
 
 export const skip: Command = {
   name: "skip",
@@ -26,8 +27,8 @@ export const skip: Command = {
           flags: 64,
         });
       }
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      error(e);
       interaction.createMessage({
         embeds: [
           embedCreate({

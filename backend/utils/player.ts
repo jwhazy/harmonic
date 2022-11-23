@@ -2,8 +2,8 @@ import Eris, { InteractionDataOptionsWithValue } from "eris";
 import ytdl from "ytdl-core";
 import fs from "fs";
 import ytsr, { Video } from "ytsr";
-import Song from "./types/Song";
-import embedCreate from "./utils/embedCreate";
+import Song from "../types/Song";
+import embedCreate from "./embedCreate";
 
 class Player {
   public queue: Song[] = [];
@@ -71,6 +71,8 @@ class Player {
 
     const videoInfo = await ytdl.getBasicInfo(url);
 
+    // This videoInfo variable creates the messiest fucking code I've ever seen.
+
     this.queue.push({
       requesterId: interaction.member?.id as string,
       requesterName: interaction.member?.username as string,
@@ -78,7 +80,7 @@ class Player {
       title: videoInfo.videoDetails.title,
       thumbnail:
         videoInfo.videoDetails.thumbnails[
-          videoInfo.videoDetails.thumbnails.length - 1
+          videoInfo.videoDetails.thumbnails.length - 1 // Like what the fuck is this?
         ].url,
       author: videoInfo.videoDetails.author.name,
       avatar:
@@ -108,31 +110,32 @@ class Player {
           url: videoInfo.videoDetails.video_url,
         }),
       ],
-      components: [
-        {
-          type: 1,
-          components: [
-            {
-              type: 2,
-              style: 2,
-              label: "⏪",
-              custom_id: "skip",
-            },
-            {
-              type: 2,
-              style: 1,
-              label: "⏸️",
-              custom_id: "pause",
-            },
-            {
-              type: 2,
-              style: 2,
-              label: "⏩",
-              custom_id: "stop",
-            },
-          ],
-        },
-      ],
+      // TO-DO: Get these working!
+      // components: [
+      //   {
+      //     type: 1,
+      //     components: [
+      //       {
+      //         type: 2,
+      //         style: 2,
+      //         label: "⏪",
+      //         custom_id: "skip",
+      //       },
+      //       {
+      //         type: 2,
+      //         style: 1,
+      //         label: "⏸️",
+      //         custom_id: "pause",
+      //       },
+      //       {
+      //         type: 2,
+      //         style: 2,
+      //         label: "⏩",
+      //         custom_id: "stop",
+      //       },
+      //     ],
+      //   },
+      // ],
     });
   }
 

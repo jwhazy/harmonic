@@ -1,7 +1,7 @@
 import cors from "cors";
 
 import express from "express";
-import { success } from "./utils/logger";
+import { success } from "../utils/logger";
 
 const app = express();
 
@@ -17,6 +17,10 @@ export default function startServer() {
   });
 
   app.get("/api/get/queue", (req, res) => {
+    res.json(global.player.queue);
+  });
+
+  app.get("/api/add/queue", (req, res) => {
     res.json(global.player.queue);
   });
 

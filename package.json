@@ -6,8 +6,6 @@
   "author": "jwhazy",
   "private": true,
   "scripts": {
-    "prestart": "tsc",
-    "start": "node ./build/index.js",
     "dev": "concurrently 'vite' 'nodemon'"
   },
   "devDependencies": {

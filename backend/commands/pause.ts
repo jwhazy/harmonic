@@ -1,5 +1,6 @@
 import Command from "../types/Command";
 import embedCreate from "../utils/embedCreate";
+import { error } from "../utils/logger";
 
 export const pause: Command = {
   name: "pause",
@@ -37,8 +38,8 @@ export const pause: Command = {
           flags: 64,
         });
       }
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      error(e);
       interaction.createMessage({
         embeds: [
           embedCreate({

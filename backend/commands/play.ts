@@ -1,5 +1,6 @@
 import Command from "../types/Command";
 import embedCreate from "../utils/embedCreate";
+import { error } from "../utils/logger";
 
 export const play: Command = {
   name: "play",
@@ -17,8 +18,8 @@ export const play: Command = {
   async run(interaction) {
     try {
       global.player.play(interaction);
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      error(e);
       return interaction.createMessage({
         embeds: [
           embedCreate({

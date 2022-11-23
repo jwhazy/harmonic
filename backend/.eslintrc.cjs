@@ -22,5 +22,6 @@ module.exports = {
     "import/no-named-as-default": 0,
     "consistent-return": 0,
     "@typescript-eslint/no-unused-expressions": 0,
+    "import/extensions": 0,
   },
 };

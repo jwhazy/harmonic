@@ -3,5 +3,7 @@ type Config = {
   botId: string;
   guildId: string;
   name: string;
-  status?: string;
+  status: string;
+  dashboard: boolean;
+  guildCommands: boolean;
 };

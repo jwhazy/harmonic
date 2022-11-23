@@ -1,6 +1,7 @@
 import Eris from "eris";
 import Command from "../types/Command";
 import embedCreate from "../utils/embedCreate";
+import { error } from "../utils/logger";
 
 export const queue: Command = {
   name: "queue",
@@ -28,8 +29,8 @@ export const queue: Command = {
           }),
         ],
       });
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      error(e);
       interaction.createMessage({
         content: "There was an error getting the queue",
         flags: 64,
