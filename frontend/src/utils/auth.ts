@@ -1,7 +1,7 @@
 export default async function auth(
   password: string
 ): Promise<{ token?: string; error: boolean; message?: string }> {
-  const req = await fetch("http://localhost:3001/api/auth", {
+  const req = await fetch("http://localhost:3000/api/auth", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -1,4 +1,5 @@
 module.exports = {
+  root: true,
   env: {
     browser: true,
     es2021: true,
@@ -14,7 +15,7 @@ module.exports = {
   overrides: [],
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: "./tsconfig.json",
+    project: "./frontend/tsconfig.json",
     ecmaVersion: "latest",
     sourceType: "module",
   },

@@ -5,10 +5,9 @@ import { log, success } from "./utils/logger";
 import setGlobals from "./utils/setGlobals";
 import startServer from "./server/api";
 
-dotenv.config();
-
 log("Starting...");
 
+dotenv.config();
 setGlobals();
 
 global.client.on("ready", () => {

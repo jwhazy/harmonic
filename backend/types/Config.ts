@@ -6,4 +6,6 @@ type Config = {
   status: string;
   dashboard: boolean;
   guildCommands: boolean;
+  backendPort: number;
+  frontendPort: number;
 };

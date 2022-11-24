@@ -8,7 +8,7 @@ import checkStatus from "../utils/checkStatus";
 function Index() {
   const [allowed, setAllowed] = useState(false);
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [name, setName] = useState("HARMONIC");
   const [error, setError] = useState("");
 
   const navigate = useNavigate();

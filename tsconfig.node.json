@@ -5,5 +5,5 @@
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true
   },
-  "include": [".eslintrc.cjs"]
+  "include": ["frontend/src/**/*"]
 }

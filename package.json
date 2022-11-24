@@ -6,6 +6,9 @@
   "author": "jwhazy",
   "private": true,
   "scripts": {
+    "build": "vite build && tsc --project ./backend/",
+    "prestart": "yarn build",
+    "start": "cross-env NODE_ENV=production node .",
     "dev": "concurrently 'vite' 'nodemon'"
   },
   "devDependencies": {
@@ -43,6 +46,7 @@
     "chalk": "4.1.2",
     "clsx": "^1.2.1",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
     "eris": "^0.17.1",
     "express": "^4.18.2",

@@ -9,6 +9,20 @@ export default function startServer() {
   app.use(cors());
   app.use(express.json());
 
+  app.use("/", (req, res, next) => {
+    if (process.env.NODE_ENV !== "production" && !req.path.includes("/api/")) {
+      return res.redirect(
+        `http://${req.headers.host?.split(":")[0]}:${
+          global.config.frontendPort
+        }${req.url}`
+      );
+    }
+    next();
+  });
+
+  process.env.NODE_ENV === "production" &&
+    app.use(express.static("build/public"));
+
   app.get("/api/status", (req, res) => {
     res.json({
       frontend: true,
@@ -51,7 +65,11 @@ export default function startServer() {
     return res.status(200).send("");
   });
 
-  app.listen(3001, () => {
-    success("API started on port 3001");
+  app.get("*", (req, res) => {
+    res.sendFile("index.html", { root: "build/public" });
+  });
+
+  app.listen(3000, () => {
+    success("API started on port 3000");
   });
 }

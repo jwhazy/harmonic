@@ -1,5 +1,5 @@
 export default async function verify(token: string): Promise<boolean> {
-  const req = await fetch("http://localhost:3001/api/verify", {
+  const req = await fetch("http://localhost:3000/api/verify", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

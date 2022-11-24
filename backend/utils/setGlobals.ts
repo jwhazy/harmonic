@@ -26,7 +26,9 @@ export default function setGlobals() {
     botId: BOT_ID,
     name: NAME || "Harmonic",
     status: STATUS || "Get started with /play.",
-    dashboard: Boolean(DASHBOARD) || false,
-    guildCommands: Boolean(GUILD_COMMANDS),
+    dashboard: DASHBOARD === "true",
+    guildCommands: GUILD_COMMANDS === "true",
+    backendPort: Number(process.env.BACKEND_PORT) || 3000,
+    frontendPort: Number(process.env.FRONTEND_PORT) || 3001,
   };
 }
