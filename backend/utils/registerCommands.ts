@@ -3,7 +3,7 @@ import play from "../commands/play";
 import queue from "../commands/queue";
 import resume from "../commands/resume";
 import skip from "../commands/skip";
-import { log } from "./logger";
+import { error, log } from "./logger";
 
 export default async function registerCommands() {
   global.commands = [play, pause, resume, skip, queue];
@@ -15,8 +15,8 @@ export default async function registerCommands() {
       try {
         await client.createGuildCommand(config.guildId, command);
         log(`Registered command: ${command.name}`);
-      } catch (err) {
-        console.error(err);
+      } catch (e) {
+        error(e);
       }
     });
   }

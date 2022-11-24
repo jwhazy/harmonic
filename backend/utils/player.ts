@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-promise-executor-return */
 import Eris, { InteractionDataOptionsWithValue } from "eris";
 import ytdl from "ytdl-core";
 import fs from "fs";
@@ -7,6 +9,8 @@ import embedCreate from "./embedCreate";
 
 class Player {
   public queue: Song[] = [];
+
+  public busy = false;
 
   public connection: Eris.VoiceConnection | null = null;
 
@@ -18,14 +22,23 @@ class Player {
       fs.mkdirSync("./temp");
     }
 
-    this.queue.forEach((song) => {
-      const stream = ytdl(song.url, { filter: "audioonly" }).pipe(
+    this.queue.forEach(async (song) => {
+      this.busy = true;
+      const stream = ytdl(song.url, {
+        filter: "audioonly",
+        quality: "highestaudio",
+      }).pipe(
         fs.createWriteStream(`./temp/${encodeURIComponent(song.title)}.mp3`)
       );
 
       stream.once("finish", () => {
+        this.busy = false;
+
+        if (this.connection?.playing) return;
+
         this.connection?.play(`./temp/${encodeURIComponent(song.title)}.mp3`, {
           inlineVolume: true,
+          samplingRate: 48000,
         });
 
         if (this.queue.length > 1) {
@@ -47,9 +60,10 @@ class Player {
       return interaction.createFollowup("You are not in a voice channel!");
     }
 
-    this.connection = await client.joinVoiceChannel(voiceChannel);
-
-    this.connection.updateVoiceState(false, true);
+    if (!this.connection) {
+      this.connection = await client.joinVoiceChannel(voiceChannel);
+      this.connection.updateVoiceState(false, true);
+    }
 
     let url = input.value as string;
 
