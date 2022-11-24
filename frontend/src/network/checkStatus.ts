@@ -1,5 +1,7 @@
-export default async function getQueue() {
-  const req = await fetch("http://localhost:3000/api/get/queue", {
+import url from "../utils/url";
+
+export default async function checkStatus() {
+  const req = await fetch(`${url}/api/status`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

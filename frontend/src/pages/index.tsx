@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import Input from "../components/Input";
-import auth from "../utils/auth";
-import checkStatus from "../utils/checkStatus";
+import auth from "../network/auth";
+import checkStatus from "../network/checkStatus";
 
 function Index() {
   const [allowed, setAllowed] = useState(false);
@@ -14,9 +14,11 @@ function Index() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    localStorage.clear();
     checkStatus().then((data) => {
       setAllowed(data.frontend);
       setName(data.name);
+      localStorage.setItem("port", data.port7);
       document.title = name;
     });
   }, [name]);

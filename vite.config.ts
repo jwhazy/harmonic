@@ -13,6 +13,7 @@ export default () => {
     },
     build: {
       outDir: "../build/public",
+      emptyOutDir: true,
     },
   });
 };

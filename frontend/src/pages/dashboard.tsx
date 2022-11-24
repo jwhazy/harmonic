@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import Input from "../components/Input";
-import checkStatus from "../utils/checkStatus";
-import verify from "../utils/verify";
-import getQueue from "../utils/getQueue";
+import checkStatus from "../network/checkStatus";
+import verify from "../network/verify";
+import getQueue from "../network/getQueue";
 import SongType from "../types/Song";
 import Song from "../components/Song";
 import Spinner from "../components/Spinner";
@@ -65,36 +65,60 @@ function Dashboard() {
             <h1>
               <a className="font-black">{name.toUpperCase()}</a> Dashboard
             </h1>
-            <Button onClick={logout}>Log out</Button>
+            <div className="space-x-4">
+              <Button onClick={logout}>Stop bot</Button>
+              <Button onClick={logout}>Log out</Button>
+            </div>
           </div>
           <div className="flex w-full justify-between space-x-4">
-            <div className="w-1/2">
-              <h2>Queue</h2>
-              <div className="pt-2">
-                {queue?.map((song) => (
-                  <Song
-                    key={song.title}
-                    title={song.title}
-                    videoAuthor={song.author}
-                    user={song.requesterName}
-                    thumbnail={song.avatar}
-                    image={song.thumbnail}
-                  />
-                ))}
+            <div className="w-1/2 space-y-2">
+              <div className=" space-y-2">
+                <h2>Currently playing</h2>
+                <div>
+                  {queue && queue.length && queue[0] ? (
+                    <Song
+                      key={queue[0].title}
+                      title={queue[0].title}
+                      videoAuthor={queue[0].author}
+                      user={queue[0].requesterName}
+                      thumbnail={queue[0].avatar}
+                      image={queue[0].thumbnail}
+                    />
+                  ) : null}
+                </div>
+                <div className="space-y-2 ">
+                  <div className="flex w-full space-x-2 pt-2">
+                    <Button className="w-full">⏪︎</Button>
+                    <Button className="w-full">⏸︎</Button>
+                    <Button className="w-full">⏩︎</Button>
+                  </div>
+                  <div className="flex w-full space-x-2">
+                    <Input placeholder="Add to queue" />
+                    <Button>+</Button>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="w-1/2">
-              <h2>Quick actions</h2>
-              <div className="space-y-2 ">
-                <div className="flex w-full space-x-2 pt-2">
-                  <Button className="w-full">⏪︎</Button>
-                  <Button className="w-full">⏸︎</Button>
-                  <Button className="w-full">⏩︎</Button>
-                </div>
-                <div className="flex w-full space-x-2">
-                  <Input placeholder="Add to queue" />
-                  <Button>+</Button>
-                </div>
+              <h2>Queue</h2>
+              <div>
+                {queue && queue?.length ? (
+                  queue?.map((song, index) => {
+                    if (index === 0) return null;
+                    return (
+                      <Song
+                        key={song.title}
+                        title={song.title}
+                        videoAuthor={song.author}
+                        user={song.requesterName}
+                        thumbnail={song.avatar}
+                        image={song.thumbnail}
+                      />
+                    );
+                  })
+                ) : (
+                  <p className="text-gray-300">No songs in queue.</p>
+                )}
               </div>
             </div>
           </div>

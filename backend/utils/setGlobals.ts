@@ -28,7 +28,7 @@ export default function setGlobals() {
     status: STATUS || "Get started with /play.",
     dashboard: DASHBOARD === "true",
     guildCommands: GUILD_COMMANDS === "true",
-    backendPort: Number(process.env.BACKEND_PORT) || 3000,
+    backendPort: Number(process.env.VITE_BACKEND_PORT),
     frontendPort: Number(process.env.FRONTEND_PORT) || 3001,
   };
 }
