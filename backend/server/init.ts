@@ -16,10 +16,6 @@ app.get("/get/queue", authCheck, (req, res) => {
   res.json(global.player.queue);
 });
 
-app.get("/add/queue", authCheck, (req, res) => {
-  res.json(global.player.queue);
-});
-
 app.get("/shutdown", authCheck, (req, res) => {
   res.json({
     message: "Shutting down...",

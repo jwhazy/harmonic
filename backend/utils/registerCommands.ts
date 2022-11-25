@@ -1,23 +1,36 @@
+import {
+  REST,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+  Routes,
+} from "discord.js";
 import pause from "../commands/pause";
 import play from "../commands/play";
 import queue from "../commands/queue";
 import resume from "../commands/resume";
-import skip from "../commands/skip";
-import { error, log } from "./logger";
+import stop from "../commands/stop";
+import Command from "../types/Command";
+
+// wut
+const json: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [];
 
 export default async function registerCommands() {
-  global.commands = [play, pause, resume, skip, queue];
+  global.commands = new Map<string, Command>();
 
-  if (config.guildId) {
-    log("Registering guild commands, this can take awhile...");
+  [play, pause, queue, resume, stop].forEach((command) => {
+    json.push(command.data.toJSON());
+    commands.set(command.data.name, command);
+  });
 
-    commands.forEach(async (command) => {
-      try {
-        await client.createGuildCommand(config.guildId, command);
-        log(`Registered command: ${command.name}`);
-      } catch (e) {
-        error(e);
-      }
-    });
+  const rest = new REST({ version: "10" }).setToken(
+    process.env.BOT_TOKEN as string
+  );
+
+  try {
+    await rest.put(
+      Routes.applicationGuildCommands(config.botId, config.guildId),
+      { body: json }
+    );
+  } catch (error) {
+    console.error(error);
   }
 }

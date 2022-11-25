@@ -1,39 +1,57 @@
-import Eris from "eris";
+import {
+  SlashCommandBuilder,
+  CommandInteraction,
+  APIEmbedField,
+} from "discord.js";
 import Command from "../types/Command";
+import Song from "../types/Song";
 import embedCreate from "../utils/embedCreate";
 import { error } from "../utils/logger";
 
-export const queue: Command = {
-  name: "queue",
-  description: "List the queue",
-  type: 1,
-  async run(interaction) {
-    const q: Eris.EmbedField[] = [];
+const queue: Command = {
+  data: new SlashCommandBuilder()
+    .setName("queue")
+    .setDescription("Get the current queue."),
+
+  async run(interaction: CommandInteraction) {
+    const q: APIEmbedField[] = [];
     try {
-      global.player.queue.forEach((song, index) => {
+      global.player.queue.forEach((song: Song, index: number) => {
         q.push({
           name: `${index + 1}. ${song.title}`,
           value: song.url,
           inline: true,
         });
       });
-      return await interaction.createMessage({
+      await interaction.editReply({
         embeds: [
           embedCreate({
             title: "Queue",
             description: "All songs in queue:",
             author: "🎶🎶🎶",
-            thumbnail: interaction.member?.avatarURL,
+            thumbnail:
+              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+              "https://cdn.jacksta.dev/assets/newUser.png",
             fields: q,
             color: 0x00ff00,
           }),
         ],
       });
+      return;
     } catch (e) {
       error(e);
-      interaction.createMessage({
-        content: "There was an error getting the queue",
-        flags: 64,
+      await interaction.editReply({
+        embeds: [
+          embedCreate({
+            title: "There was an error pausing the song",
+            description: "Make sure you are in a voice channel.",
+            author: "🎶🎶🎶",
+            thumbnail:
+              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+              "https://cdn.jacksta.dev/assets/newUser.png",
+            color: 0x880808,
+          }),
+        ],
       });
     }
   },

@@ -1,4 +1,4 @@
-import Eris from "eris";
+import { APIEmbedField } from "discord.js";
 
 type Embed = {
   title: string;
@@ -7,7 +7,7 @@ type Embed = {
   image?: string;
   thumbnail?: string;
   color: number;
-  fields?: Eris.EmbedField[];
+  fields?: APIEmbedField[];
   url?: string;
 };
 

@@ -50,7 +50,7 @@ function Dashboard() {
 
   if (!authed)
     return (
-      <div className="flex h-screen items-center justify-center bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-800 to-zinc-900">
+      <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center justify-center space-x-8">
           <Spinner />
         </div>
@@ -58,7 +58,7 @@ function Dashboard() {
     );
 
   return (
-    <div className="flex h-screen items-center justify-center bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-800 to-zinc-900 ">
+    <div className="flex h-screen items-center justify-center ">
       <div className="animate__animated animate__zoomIn flex flex-col items-center justify-center space-x-8 ">
         <main className="h-[90vh] w-[95vw] space-y-4 rounded-2xl border border-zinc-600 bg-gray-300 bg-opacity-10 py-4 px-6 shadow-xl backdrop:blur-lg">
           <div className="flex justify-between">
@@ -74,52 +74,52 @@ function Dashboard() {
             <div className="w-1/2 space-y-2">
               <div className=" space-y-2">
                 <h2>Currently playing</h2>
-                <div>
-                  {queue && queue.length && queue[0] ? (
-                    <Song
-                      key={queue[0].title}
-                      title={queue[0].title}
-                      videoAuthor={queue[0].author}
-                      user={queue[0].requesterName}
-                      thumbnail={queue[0].avatar}
-                      image={queue[0].thumbnail}
-                    />
-                  ) : null}
-                </div>
+                {queue && queue.length && queue[0] ? (
+                  <Song
+                    key={queue[0].title}
+                    title={queue[0].title}
+                    videoAuthor={queue[0].author}
+                    user={queue[0].requesterName}
+                    thumbnail={queue[0].avatar}
+                    image={queue[0].thumbnail}
+                  />
+                ) : (
+                  <p className="text-gray-300">
+                    There is no song currently playing.
+                  </p>
+                )}
+
                 <div className="space-y-2 ">
-                  <div className="flex w-full space-x-2 pt-2">
-                    <Button className="w-full">⏪︎</Button>
-                    <Button className="w-full">⏸︎</Button>
-                    <Button className="w-full">⏩︎</Button>
-                  </div>
-                  <div className="flex w-full space-x-2">
-                    <Input placeholder="Add to queue" />
-                    <Button>+</Button>
-                  </div>
+                  {!queue ? (
+                    <div className="flex w-full space-x-2 pt-2">
+                      <Button className="w-full">⏪︎</Button>
+                      <Button className="w-full">⏸︎</Button>
+                      <Button className="w-full">⏩︎</Button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
-            <div className="w-1/2">
+            <div className="w-1/2 space-y-2">
               <h2>Queue</h2>
-              <div>
-                {queue && queue?.length ? (
-                  queue?.map((song, index) => {
-                    if (index === 0) return null;
-                    return (
-                      <Song
-                        key={song.title}
-                        title={song.title}
-                        videoAuthor={song.author}
-                        user={song.requesterName}
-                        thumbnail={song.avatar}
-                        image={song.thumbnail}
-                      />
-                    );
-                  })
-                ) : (
-                  <p className="text-gray-300">No songs in queue.</p>
-                )}
-              </div>
+
+              {queue && queue?.length ? (
+                queue?.map((song, index) => {
+                  if (index === 0) return null;
+                  return (
+                    <Song
+                      key={song.title}
+                      title={song.title}
+                      videoAuthor={song.author}
+                      user={song.requesterName}
+                      thumbnail={song.avatar}
+                      image={song.thumbnail}
+                    />
+                  );
+                })
+              ) : (
+                <p className="text-gray-300">No songs in queue.</p>
+              )}
             </div>
           </div>
         </main>

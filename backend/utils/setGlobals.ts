@@ -1,5 +1,3 @@
-import Eris from "eris";
-import { error } from "./logger";
 import Player from "./player";
 
 export default function setGlobals() {
@@ -14,11 +12,10 @@ export default function setGlobals() {
   } = process.env;
 
   if (!BOT_ID || !GUILD_ID || !BOT_TOKEN) {
-    error("Missing enviroment variables.");
+    console.error("Missing enviroment variables.");
     process.exit(1);
   }
 
-  global.client = Eris(BOT_TOKEN as string);
   global.player = new Player();
 
   global.config = {

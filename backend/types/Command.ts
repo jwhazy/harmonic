@@ -1,7 +1,8 @@
-import Eris from "eris";
+import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 
-export type Command = {
-  run: (interaction: Eris.CommandInteraction) => void;
-} & Eris.ApplicationCommandStructure;
+type Command = {
+  data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
+  run: (interaction: CommandInteraction) => Promise<void>;
+};
 
 export default Command;

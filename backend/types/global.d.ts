@@ -1,15 +1,15 @@
 /* eslint-disable vars-on-top */
 /* eslint-disable no-var */
-import Eris from "eris";
+import { Client } from "discord.js";
+import Command from "./Command";
 import Player from "../utils/player";
-import Command from "./command";
 
 // I fucking hate using global variables
 
 declare global {
-  var client: Eris.Client;
-  var commands: Command[];
+  var client: Client;
   var config: Config;
+  var commands: Map<string, Command>;
   var player: Player;
   var token: string;
 }

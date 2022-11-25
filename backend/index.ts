@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
+import { Client } from "discord.js";
 import registerCommands from "./utils/registerCommands";
-import registerInteractions from "./listeners/interaction";
+import registerInteractions from "./handlers/interactionCreate";
 import { log, success } from "./utils/logger";
 import setGlobals from "./utils/setGlobals";
 import startServer from "./server/api";
@@ -8,9 +9,17 @@ import startServer from "./server/api";
 log("Starting...");
 
 dotenv.config();
+
+global.client = new Client({
+  intents: [
+    1, 2, 4, 8, 16, 32, 64, 128, 256, 1024, 2048, 4096, 8192, 16384, 32768,
+    65536, 1048576, 2097152,
+  ],
+});
+
 setGlobals();
 
-global.client.on("ready", () => {
+client.once("ready", () => {
   registerInteractions();
 
   global.config.guildCommands && registerCommands();
@@ -18,9 +27,9 @@ global.client.on("ready", () => {
   global.config.dashboard && startServer();
 
   global.config.status &&
-    client.editStatus("dnd", {
-      type: 3,
-      name: global.config.status || "Get started with /play.",
+    client.user?.setPresence({
+      status: "online",
+      activities: [{ name: global.config.status, type: 0 }],
     });
 
   success(
@@ -28,4 +37,4 @@ global.client.on("ready", () => {
   );
 });
 
-client.connect();
+client.login(process.env.BOT_TOKEN);

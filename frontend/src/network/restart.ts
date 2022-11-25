@@ -1,23 +1,15 @@
 import url from "../utils/url";
 
-export default async function restart(
-  password: string
-): Promise<{ token?: string; error: boolean; message?: string }> {
+export default async function restart() {
   const req = await fetch(`${url}/api/restart`, {
-    method: "POST",
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
+      authorization: `Bearer ${localStorage.getItem("token")}`,
     },
-    body: JSON.stringify({
-      password,
-    }),
   });
 
   const json = await req.json();
 
-  if (json.token) return { token: json.token, error: false };
-
-  if (json.error) return { message: json.message, error: false };
-
-  return { error: true };
+  return json;
 }

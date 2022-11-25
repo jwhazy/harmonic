@@ -1,56 +1,44 @@
+import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import Command from "../types/Command";
 import embedCreate from "../utils/embedCreate";
 import { error } from "../utils/logger";
 
-export const resume: Command = {
-  name: "resume",
-  description: "Resume the current song (if paused)",
-  type: 1,
-  async run(interaction) {
-    try {
-      if (global.player.resume()) {
-        interaction.createMessage({
-          embeds: [
-            embedCreate({
-              title: player.queue[0].title,
-              description: "Resumed",
-              author: "🎶🎶🎶",
-              image: player.queue[0].avatar,
-              thumbnail: player.queue[0].avatar,
+const resume: Command = {
+  data: new SlashCommandBuilder()
+    .setName("resume")
+    .setDescription("Resume playing the current song."),
 
-              color: 0x00ff00,
-              url: player.queue[0].url,
-            }),
-          ],
-          flags: 64,
-        });
-      } else {
-        interaction.createMessage({
+  async run(interaction: CommandInteraction) {
+    try {
+      if (!global.player.resume(interaction)) {
+        await interaction.editReply({
           embeds: [
             embedCreate({
-              title: "There was an error resuming the song",
-              description: "Make sure you are in a voice channel.",
+              title: "Song resumed",
+              description: "Type /pause at anytime to pause.",
               author: "🎶🎶🎶",
-              thumbnail: interaction.member?.avatarURL,
-              color: 0x880808,
+              thumbnail:
+                `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+                "https://cdn.jacksta.dev/assets/newUser.png",
+              color: 0x00ff00,
             }),
           ],
-          flags: 64,
         });
       }
     } catch (e) {
       error(e);
-      interaction.createMessage({
+      await interaction.editReply({
         embeds: [
           embedCreate({
-            title: "There was an error resuming the song",
+            title: "There was an error pausing the song",
             description: "Make sure you are in a voice channel.",
             author: "🎶🎶🎶",
-            thumbnail: interaction.member?.avatarURL,
+            thumbnail:
+              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+              "https://cdn.jacksta.dev/assets/newUser.png",
             color: 0x880808,
           }),
         ],
-        flags: 64,
       });
     }
   },

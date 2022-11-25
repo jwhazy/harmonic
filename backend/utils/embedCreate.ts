@@ -1,4 +1,4 @@
-import { EmbedOptions } from "eris";
+import { EmbedBuilder } from "discord.js";
 import Embed from "../types/Embed";
 
 export default function embedCreate({
@@ -11,26 +11,29 @@ export default function embedCreate({
   url,
   fields,
 }: Embed) {
-  const embed: EmbedOptions = {
-    title,
-    description,
-    url,
-    timestamp: new Date(),
-    color,
-    footer: {
-      text: config.name,
-    },
-    image: {
-      url: image,
-    },
-    thumbnail: {
-      url: thumbnail,
-    },
-    fields,
-    author: {
+  const embed = new EmbedBuilder()
+    .setColor(color)
+    .setTitle(title)
+    .setURL(url || null)
+    .setAuthor({
       name: author,
-    },
-  };
+    })
+    .setDescription(description)
+    .setThumbnail(thumbnail || null)
+    .setImage(image || null)
+    .setTimestamp(new Date())
+    .setFooter({
+      text: global.config.name,
+      iconURL:
+        `https://cdn.discordapp.com/avatars/${global.client.user?.id}/${global.client.user?.avatar}.png` ||
+        undefined,
+    });
+
+  if (fields) {
+    fields.forEach((field) => {
+      embed.addFields(...field);
+    });
+  }
 
   return embed;
 }

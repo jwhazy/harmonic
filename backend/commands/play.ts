@@ -1,37 +1,20 @@
+import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import Command from "../types/Command";
-import embedCreate from "../utils/embedCreate";
 import { error } from "../utils/logger";
 
-export const play: Command = {
-  name: "play",
-  description: "Play song (or add to queue)",
-  type: 1,
-  options: [
-    {
-      name: "url",
-      description: "Name or URL of media",
-      type: 3,
-      required: false,
-    },
-  ],
+const play: Command = {
+  data: new SlashCommandBuilder()
+    .setName("play")
+    .setDescription("Play a song or resume one!")
+    .addStringOption((option) =>
+      option.setName("title").setDescription("The title or URL of the song.")
+    ),
 
-  async run(interaction) {
+  async run(interaction: CommandInteraction) {
     try {
       global.player.play(interaction);
     } catch (e) {
       error(e);
-      return interaction.createMessage({
-        embeds: [
-          embedCreate({
-            title: "There was an error playing your song",
-            description: "Make sure you are in a voice channel and try again.",
-            author: "🎶🎶🎶",
-            thumbnail: interaction.member?.avatarURL,
-            color: 0x880808,
-          }),
-        ],
-        flags: 64,
-      });
     }
   },
 };

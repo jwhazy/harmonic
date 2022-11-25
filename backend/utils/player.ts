@@ -1,81 +1,149 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-promise-executor-return */
-import Eris, { InteractionDataOptionsWithValue } from "eris";
+import {
+  createAudioPlayer,
+  AudioPlayer,
+  joinVoiceChannel,
+  VoiceConnection,
+  AudioPlayerStatus,
+  createAudioResource,
+  NoSubscriberBehavior,
+} from "@discordjs/voice";
+import {
+  CommandInteraction,
+  InternalDiscordGatewayAdapterCreator,
+} from "discord.js";
 import ytdl from "ytdl-core";
-import fs from "fs";
 import ytsr, { Video } from "ytsr";
+import playDl from "play-dl";
 import Song from "../types/Song";
 import embedCreate from "./embedCreate";
+import { error, log } from "./logger";
 
 class Player {
-  public queue: Song[] = [];
+  public audio: AudioPlayer;
 
-  public busy = false;
+  public connection: VoiceConnection | null = null;
 
-  public connection: Eris.VoiceConnection | null = null;
+  public queue: Song[];
+
+  constructor() {
+    this.audio = createAudioPlayer({
+      behaviors: {
+        noSubscriber: NoSubscriberBehavior.Play,
+      },
+    });
+    this.queue = [];
+  }
 
   private async player() {
-    if (!this.connection) return;
-    if (!this.queue.length) return;
-
-    if (!fs.existsSync("./temp")) {
-      fs.mkdirSync("./temp");
+    if (this.queue.length <= 0) {
+      this.connection?.disconnect();
+      this.connection = null;
+      return;
     }
 
-    this.queue.forEach(async (song) => {
-      this.busy = true;
-      const stream = ytdl(song.url, {
-        filter: "audioonly",
-        quality: "highestaudio",
-      }).pipe(
-        fs.createWriteStream(`./temp/${encodeURIComponent(song.title)}.mp3`)
-      );
+    const song = this.queue[0];
 
-      stream.once("finish", () => {
-        this.busy = false;
+    const stream = await playDl.stream(song.url);
 
-        if (this.connection?.playing) return;
+    const resource = createAudioResource(stream.stream, {
+      inputType: stream.type,
+      inlineVolume: true,
+    });
 
-        this.connection?.play(`./temp/${encodeURIComponent(song.title)}.mp3`, {
-          inlineVolume: true,
-          samplingRate: 48000,
-        });
+    resource.volume?.setVolume(0.5);
 
-        if (this.queue.length > 1) {
-          this.queue.shift();
-        }
-      });
+    this.audio.play(resource);
+
+    this.connection?.subscribe(this.audio);
+
+    this.audio.once(AudioPlayerStatus.Idle, () => {
+      this.queue.shift();
+      return this.player();
+    });
+
+    this.audio.once("error", (e) => {
+      error(e);
     });
   }
 
-  public async play(interaction: Eris.CommandInteraction) {
-    const input = interaction.data
-      .options?.[0] as InteractionDataOptionsWithValue;
+  public async play(interaction: CommandInteraction) {
+    let url = interaction.options.get("title")?.value as string;
 
-    if (!input) return interaction.createFollowup("No input");
+    const user = interaction.guild?.members.cache.get(
+      interaction.member?.user.id as string
+    );
 
-    const voiceChannel = interaction.member?.voiceState?.channelID;
+    const channel = user?.voice.channel;
 
-    if (!voiceChannel) {
-      return interaction.createFollowup("You are not in a voice channel!");
+    log(`User ${interaction.member?.user.username} requested to play ${url}`);
+
+    if (!channel) {
+      await interaction.editReply({
+        embeds: [
+          embedCreate({
+            title: "There was an error!",
+            description: "Reason: Make sure you are in a voice channel.",
+            author: "🎶🎶🎶",
+            thumbnail:
+              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+              "https://cdn.jacksta.dev/assets/newUser.png",
+            color: 0x880808,
+          }),
+        ],
+      });
+      return error(
+        `User ${interaction.member?.user.username} failed to play ${url}, reason: Not in a voice channel.`
+      );
+    }
+
+    if (!url) {
+      this.resume(interaction);
+      return;
     }
 
     if (!this.connection) {
-      this.connection = await client.joinVoiceChannel(voiceChannel);
-      this.connection.updateVoiceState(false, true);
+      this.connection = joinVoiceChannel({
+        channelId: channel.id,
+        guildId: interaction.guild?.id as string,
+        adapterCreator: interaction.guild
+          ?.voiceAdapterCreator as InternalDiscordGatewayAdapterCreator,
+      });
+      log("Joined voice channel.");
     }
-
-    let url = input.value as string;
 
     if (!ytdl.validateURL(url)) {
       const search = await ytsr(url, { limit: 1 });
-
       if (!search.items.length) {
-        return interaction.createFollowup("No video found!");
+        await interaction.editReply({
+          embeds: [
+            embedCreate({
+              title: "",
+              description: "Reason: Make sure you are in a voice channel.",
+              author: "🎶🎶🎶",
+              thumbnail:
+                `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+                "https://cdn.jacksta.dev/assets/newUser.png",
+              color: 0x880808,
+            }),
+          ],
+        });
       }
 
       if (!search.items[0].type.includes("video")) {
-        return interaction.createFollowup("No video found!");
+        await interaction.editReply({
+          embeds: [
+            embedCreate({
+              title: `No results found for ${url}.`,
+              description: "Try a different search term.",
+              author: "🎶🎶🎶",
+              thumbnail:
+                `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+                "https://cdn.jacksta.dev/assets/newUser.png",
+              color: 0x880808,
+            }),
+          ],
+        });
+        return;
       }
 
       const video = search.items[0] as Video;
@@ -85,11 +153,9 @@ class Player {
 
     const videoInfo = await ytdl.getBasicInfo(url);
 
-    // This videoInfo variable creates the messiest fucking code I've ever seen.
-
     this.queue.push({
-      requesterId: interaction.member?.id as string,
-      requesterName: interaction.member?.username as string,
+      requesterId: interaction.user.id,
+      requesterName: interaction.user.username,
       url,
       title: videoInfo.videoDetails.title,
       thumbnail:
@@ -104,11 +170,11 @@ class Player {
       description: videoInfo.videoDetails.description,
     });
 
-    if (!this.connection.playing) {
+    if (this.audio.state.status !== AudioPlayerStatus.Playing) {
       this.player();
     }
 
-    return interaction.createFollowup({
+    await interaction.editReply({
       embeds: [
         embedCreate({
           title: videoInfo.videoDetails.title,
@@ -124,66 +190,100 @@ class Player {
           url: videoInfo.videoDetails.video_url,
         }),
       ],
-      // TO-DO: Get these working!
-      // components: [
-      //   {
-      //     type: 1,
-      //     components: [
-      //       {
-      //         type: 2,
-      //         style: 2,
-      //         label: "⏪",
-      //         custom_id: "skip",
-      //       },
-      //       {
-      //         type: 2,
-      //         style: 1,
-      //         label: "⏸️",
-      //         custom_id: "pause",
-      //       },
-      //       {
-      //         type: 2,
-      //         style: 2,
-      //         label: "⏩",
-      //         custom_id: "stop",
-      //       },
-      //     ],
-      //   },
-      // ],
     });
   }
 
-  public pause() {
-    if (!this.connection) return false;
+  public async skip(interaction?: CommandInteraction) {
+    if (!this.connection || !this.queue.length) return;
 
-    this.connection.pause();
-    return true;
-  }
+    if (interaction)
+      await interaction.editReply({
+        embeds: [
+          embedCreate({
+            title: player.queue[0].title,
+            description: "Skipped song.",
+            author: "🎶🎶🎶",
+            image: player.queue[0].avatar,
+            thumbnail: player.queue[0].thumbnail,
 
-  public resume() {
-    if (!this.connection) return false;
+            color: 0x00ff00,
+            url: player.queue[0].url,
+          }),
+        ],
+      });
 
-    this.connection.resume();
-    return true;
-  }
-
-  public stop() {
-    if (!this.connection) return false;
-
-    this.queue = [];
-    this.connection.stopPlaying();
-
-    return true;
-  }
-
-  public skip() {
-    if (!this.connection) return false;
-
-    this.connection.stopPlaying();
     this.queue.shift();
 
     this.player();
 
+    return true;
+  }
+
+  public async stop(interaction?: CommandInteraction) {
+    if (!this.connection || !this.queue.length) return false;
+
+    if (interaction)
+      await interaction.editReply({
+        embeds: [
+          embedCreate({
+            title: "Stopped playing the song.",
+            description: "Stopped playing the song & cleared the queue.",
+            author: "🎶🎶🎶",
+            thumbnail:
+              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+              "https://cdn.jacksta.dev/assets/newUser.png",
+            color: 0x00ff00,
+          }),
+        ],
+      });
+
+    this.queue = [];
+
+    this.audio.stop();
+    return true;
+  }
+
+  public async pause(interaction?: CommandInteraction) {
+    if (!this.connection || !this.queue.length) return false;
+
+    if (interaction)
+      await interaction.editReply({
+        embeds: [
+          embedCreate({
+            title: "Song paused",
+            description: "Type /resume at anytime to resume.",
+            author: "🎶🎶🎶",
+            thumbnail:
+              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+              "https://cdn.jacksta.dev/assets/newUser.png",
+            color: 0x00ff00,
+          }),
+        ],
+      });
+
+    this.audio.pause();
+    return true;
+  }
+
+  public async resume(interaction?: CommandInteraction) {
+    if (!this.connection || !this.queue.length) return false;
+
+    if (interaction)
+      await interaction.editReply({
+        embeds: [
+          embedCreate({
+            title: "Song resumed",
+            description: "Type /pause at anytime to pause.",
+            author: "🎶🎶🎶",
+            thumbnail:
+              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+              "https://cdn.jacksta.dev/assets/newUser.png",
+            color: 0x00ff00,
+          }),
+        ],
+      });
+
+    this.audio.unpause();
     return true;
   }
 }
