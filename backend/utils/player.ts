@@ -203,8 +203,8 @@ class Player {
             title: player.queue[0].title,
             description: "Skipped song.",
             author: "🎶🎶🎶",
-            image: player.queue[0].avatar,
-            thumbnail: player.queue[0].thumbnail,
+            image: player.queue[0].thumbnail,
+            thumbnail: player.queue[0].avatar,
 
             color: 0x00ff00,
             url: player.queue[0].url,

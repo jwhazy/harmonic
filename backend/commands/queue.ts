@@ -43,8 +43,8 @@ const queue: Command = {
       await interaction.editReply({
         embeds: [
           embedCreate({
-            title: "There was an error pausing the song",
-            description: "Make sure you are in a voice channel.",
+            title: "There was an error fetching the queue.",
+            description: "Please try again later.",
             author: "🎶🎶🎶",
             thumbnail:
               `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||

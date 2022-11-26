@@ -5,7 +5,7 @@ import { error } from "../utils/logger";
 
 const skip: Command = {
   data: new SlashCommandBuilder()
-    .setName("Skip")
+    .setName("skip")
     .setDescription("Skip the playing current song."),
 
   async run(interaction: CommandInteraction) {

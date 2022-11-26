@@ -7,6 +7,7 @@ import pause from "../commands/pause";
 import play from "../commands/play";
 import queue from "../commands/queue";
 import resume from "../commands/resume";
+import skip from "../commands/skip";
 import stop from "../commands/stop";
 import Command from "../types/Command";
 
@@ -16,7 +17,7 @@ const json: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [];
 export default async function registerCommands() {
   global.commands = new Map<string, Command>();
 
-  [play, pause, queue, resume, stop].forEach((command) => {
+  [play, pause, queue, resume, stop, skip].forEach((command) => {
     json.push(command.data.toJSON());
     commands.set(command.data.name, command);
   });
