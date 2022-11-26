@@ -4,8 +4,5 @@ type Config = {
   guildId: string;
   name: string;
   status: string;
-  dashboard: boolean;
   guildCommands: boolean;
-  backendPort: number;
-  frontendPort: number;
 };

@@ -4,7 +4,6 @@ import registerCommands from "./utils/registerCommands";
 import registerInteractions from "./handlers/interactionCreate";
 import { log, success } from "./utils/logger";
 import setGlobals from "./utils/setGlobals";
-import startServer from "./server/api";
 
 log("Starting...");
 
@@ -23,8 +22,6 @@ client.once("ready", () => {
   registerInteractions();
 
   global.config.guildCommands && registerCommands();
-
-  global.config.dashboard && startServer();
 
   global.config.status &&
     client.user?.setPresence({
