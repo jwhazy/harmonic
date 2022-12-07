@@ -67,57 +67,22 @@ class Player {
   }
 
   public async play(interaction: CommandInteraction) {
-    let url = interaction.options.get("title")?.value as string;
+    try {
+      let url = interaction.options.get("title")?.value as string;
 
-    const user = interaction.guild?.members.cache.get(
-      interaction.member?.user.id as string
-    );
-
-    const channel = user?.voice.channel;
-
-    log(`User ${interaction.member?.user.username} requested to play ${url}`);
-
-    if (!channel) {
-      await interaction.editReply({
-        embeds: [
-          embedCreate({
-            title: "There was an error!",
-            description: "Reason: Make sure you are in a voice channel.",
-            author: "🎶🎶🎶",
-            thumbnail:
-              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
-              "https://cdn.jacksta.dev/assets/newUser.png",
-            color: 0x880808,
-          }),
-        ],
-      });
-      return error(
-        `User ${interaction.member?.user.username} failed to play ${url}, reason: Not in a voice channel.`
+      const user = interaction.guild?.members.cache.get(
+        interaction.member?.user.id as string
       );
-    }
 
-    if (!url) {
-      this.resume(interaction);
-      return;
-    }
+      const channel = user?.voice.channel;
 
-    if (!this.connection) {
-      this.connection = joinVoiceChannel({
-        channelId: channel.id,
-        guildId: interaction.guild?.id as string,
-        adapterCreator: interaction.guild
-          ?.voiceAdapterCreator as InternalDiscordGatewayAdapterCreator,
-      });
-      log("Joined voice channel.");
-    }
+      log(`User ${interaction.member?.user.username} requested to play ${url}`);
 
-    if (!ytdl.validateURL(url)) {
-      const search = await ytsr(url, { limit: 1 });
-      if (!search.items.length) {
+      if (!channel) {
         await interaction.editReply({
           embeds: [
             embedCreate({
-              title: "",
+              title: "There was an error!",
               description: "Reason: Make sure you are in a voice channel.",
               author: "🎶🎶🎶",
               thumbnail:
@@ -127,70 +92,135 @@ class Player {
             }),
           ],
         });
+        return error(
+          `User ${interaction.member?.user.username} failed to play ${url}, reason: Not in a voice channel.`
+        );
       }
 
-      if (!search.items[0].type.includes("video")) {
-        await interaction.editReply({
-          embeds: [
-            embedCreate({
-              title: `No results found for ${url}.`,
-              description: "Try a different search term.",
-              author: "🎶🎶🎶",
-              thumbnail:
-                `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
-                "https://cdn.jacksta.dev/assets/newUser.png",
-              color: 0x880808,
-            }),
-          ],
+      if (!url) return this.resume(interaction);
+
+      if (!this.connection) {
+        this.connection = joinVoiceChannel({
+          channelId: channel.id,
+          guildId: interaction.guild?.id as string,
+          adapterCreator: interaction.guild
+            ?.voiceAdapterCreator as InternalDiscordGatewayAdapterCreator,
         });
-        return;
+        log("Joined voice channel.");
       }
 
-      const video = search.items[0] as Video;
+      if (!ytdl.validateURL(url)) {
+        const search = await ytsr(url, { limit: 1 });
+        if (!search.items.length) {
+          await interaction.editReply({
+            embeds: [
+              embedCreate({
+                title: "",
+                description: "Reason: Make sure you are in a voice channel.",
+                author: "🎶🎶🎶",
+                thumbnail:
+                  `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+                  "https://cdn.jacksta.dev/assets/newUser.png",
+                color: 0x880808,
+              }),
+            ],
+          });
+        }
 
-      url = video.url;
+        if (!search.items[0].type.includes("video")) {
+          return await interaction.editReply({
+            embeds: [
+              embedCreate({
+                title: `No results found for ${url}.`,
+                description: "Try a different search term.",
+                author: "🎶🎶🎶",
+                thumbnail:
+                  `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+                  "https://cdn.jacksta.dev/assets/newUser.png",
+                color: 0x880808,
+              }),
+            ],
+          });
+        }
+
+        const video = search.items[0] as Video;
+
+        url = video.url;
+      }
+
+      const videoInfo = await ytdl.getBasicInfo(url);
+
+      this.queue.push({
+        requesterId: interaction.user.id,
+        requesterName: interaction.user.username,
+        url,
+        title: videoInfo.videoDetails.title,
+        thumbnail:
+          videoInfo.videoDetails.thumbnails[
+            videoInfo.videoDetails.thumbnails.length - 1 // Like what the fuck is this?
+          ].url,
+        author: videoInfo.videoDetails.author.name,
+        avatar:
+          videoInfo.videoDetails.author.thumbnails?.[0].url ||
+          "https://cdn.jacksta.dev/assets/newUser.png",
+        duration: videoInfo.videoDetails.lengthSeconds,
+        description: videoInfo.videoDetails.description,
+      });
+
+      if (this.audio.state.status !== AudioPlayerStatus.Playing) {
+        this.player();
+      }
+
+      await interaction.editReply({
+        embeds: [
+          embedCreate({
+            title: videoInfo.videoDetails.title,
+            description: "Added to queue.",
+            author: "🎶🎶🎶",
+            image:
+              videoInfo.videoDetails.thumbnails[
+                videoInfo.videoDetails.thumbnails.length - 1
+              ].url,
+            thumbnail: videoInfo.videoDetails.author?.thumbnails?.[0].url,
+
+            color: 0x00ff00,
+            url: videoInfo.videoDetails.video_url,
+          }),
+        ],
+      });
+    } catch (e) {
+      error(e);
+
+      let errorString = e as string;
+
+      if (e instanceof (Error || TypeError)) {
+        if (e.message.includes("unavailable"))
+          errorString = "This video is unavalable.";
+
+        if (e.message.includes("private"))
+          errorString = "This video is private.";
+
+        if (e.message.includes("429")) errorString = "Too many requests.";
+
+        if (e.message.includes("410"))
+          errorString =
+            "This video is age-restricted or region-locked. Try different search terms.";
+      }
+
+      await interaction.editReply({
+        embeds: [
+          embedCreate({
+            title: "There was an error!",
+            description: errorString || (e as Error).message,
+            author: "🎶🎶🎶",
+            thumbnail:
+              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+              "https://cdn.jacksta.dev/assets/newUser.png",
+            color: 0x880808,
+          }),
+        ],
+      });
     }
-
-    const videoInfo = await ytdl.getBasicInfo(url);
-
-    this.queue.push({
-      requesterId: interaction.user.id,
-      requesterName: interaction.user.username,
-      url,
-      title: videoInfo.videoDetails.title,
-      thumbnail:
-        videoInfo.videoDetails.thumbnails[
-          videoInfo.videoDetails.thumbnails.length - 1 // Like what the fuck is this?
-        ].url,
-      author: videoInfo.videoDetails.author.name,
-      avatar:
-        videoInfo.videoDetails.author.thumbnails?.[0].url ||
-        "https://cdn.jacksta.dev/assets/newUser.png",
-      duration: videoInfo.videoDetails.lengthSeconds,
-      description: videoInfo.videoDetails.description,
-    });
-
-    if (this.audio.state.status !== AudioPlayerStatus.Playing) {
-      this.player();
-    }
-
-    await interaction.editReply({
-      embeds: [
-        embedCreate({
-          title: videoInfo.videoDetails.title,
-          description: "Added to queue.",
-          author: "🎶🎶🎶",
-          image:
-            videoInfo.videoDetails.thumbnails[
-              videoInfo.videoDetails.thumbnails.length - 1
-            ].url,
-          thumbnail: videoInfo.videoDetails.author?.thumbnails?.[0].url,
-
-          color: 0x00ff00,
-          url: videoInfo.videoDetails.video_url,
-        }),
-      ],
-    });
   }
 
   public async skip(interaction?: CommandInteraction) {
