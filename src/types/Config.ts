@@ -5,4 +5,5 @@ type Config = {
   name: string;
   status: string;
   guildCommands: boolean;
+  cookies: string;
 };

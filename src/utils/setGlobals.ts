@@ -1,7 +1,7 @@
 import Player from "./player";
 
 export default function setGlobals() {
-  const { GUILD_ID, BOT_TOKEN, NAME, BOT_ID, STATUS, GUILD_COMMANDS } =
+  const { GUILD_ID, BOT_TOKEN, NAME, BOT_ID, STATUS, GUILD_COMMANDS, COOKIES } =
     process.env;
 
   if (!BOT_ID || !GUILD_ID || !BOT_TOKEN) {
@@ -17,5 +17,6 @@ export default function setGlobals() {
     name: NAME || "Harmonic",
     status: STATUS || "Get started with /play.",
     guildCommands: GUILD_COMMANDS === "true",
+    cookies: COOKIES as string,
   };
 }

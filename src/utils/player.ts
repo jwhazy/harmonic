@@ -43,6 +43,12 @@ class Player {
 
     const song = this.queue[0];
 
+    config.cookies &&
+      playDl.setToken({
+        youtube: {
+          cookie: config.cookies,
+        },
+      });
     const stream = await playDl.stream(song.url);
 
     const resource = createAudioResource(stream.stream, {
@@ -110,7 +116,14 @@ class Player {
       }
 
       if (!ytdl.validateURL(url)) {
-        const search = await ytsr(url, { limit: 1 });
+        const search = await ytsr(url, {
+          limit: 1,
+          requestOptions: {
+            headers: {
+              Cookie: config.cookies,
+            },
+          },
+        });
         if (!search.items.length) {
           await interaction.editReply({
             embeds: [
@@ -148,7 +161,18 @@ class Player {
         url = video.url;
       }
 
-      const videoInfo = await ytdl.getBasicInfo(url);
+      const videoInfo = await ytdl.getBasicInfo(
+        url,
+        config.cookies
+          ? {
+              requestOptions: {
+                headers: {
+                  Cookie: config.cookies,
+                },
+              },
+            }
+          : {}
+      );
 
       this.queue.push({
         requesterId: interaction.user.id,
@@ -204,7 +228,7 @@ class Player {
 
         if (e.message.includes("410"))
           errorString =
-            "This video is age-restricted or region-locked. Try different search terms.";
+            "This video is age-restricted or region-locked. Try different search terms or ask the owner to add cookies to the config.";
       }
 
       await interaction.editReply({
