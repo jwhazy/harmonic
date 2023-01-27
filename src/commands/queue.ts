@@ -18,25 +18,43 @@ const queue: Command = {
     try {
       global.player.queue.forEach((song: Song, index: number) => {
         q.push({
-          name: `${index + 1}. ${song.title}`,
+          name: `${(index + 1).toString()}. ${song.title || "unknown"}`,
           value: song.url,
           inline: true,
         });
       });
-      await interaction.editReply({
-        embeds: [
-          embedCreate({
-            title: "Queue",
-            description: "All songs in queue:",
-            author: "🎶🎶🎶",
-            thumbnail:
-              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
-              "https://cdn.jacksta.dev/assets/newUser.png",
-            fields: q,
-            color: 0x00ff00,
-          }),
-        ],
-      });
+
+      if (q.length >= 1) {
+        await interaction.editReply({
+          embeds: [
+            embedCreate({
+              title: "Queue",
+              description: "All songs in queue:",
+              author: "🎶🎶🎶",
+              thumbnail:
+                `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+                "https://cdn.jacksta.dev/assets/newUser.png",
+              fields: q,
+              color: 0x00ff00,
+            }),
+          ],
+        });
+      } else {
+        await interaction.editReply({
+          embeds: [
+            embedCreate({
+              title: "There was an error fetching the queue.",
+              description: "Reason: No songs in queue.",
+              author: "🎶🎶🎶",
+              thumbnail:
+                `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+                "https://cdn.jacksta.dev/assets/newUser.png",
+              color: 0x880808,
+            }),
+          ],
+        });
+      }
+
       return;
     } catch (e) {
       error(e);

@@ -76,6 +76,8 @@ class Player {
     try {
       let url = interaction.options.get("title")?.value as string;
 
+      if (!url) return await this.resume(interaction);
+
       const user = interaction.guild?.members.cache.get(
         interaction.member?.user.id as string
       );
@@ -103,7 +105,7 @@ class Player {
         );
       }
 
-      if (!url) return this.resume(interaction);
+      if (!url) return await this.resume(interaction);
 
       if (!this.connection) {
         this.connection = joinVoiceChannel({
@@ -138,6 +140,30 @@ class Player {
               }),
             ],
           });
+        } else if (url.includes("spotify")) {
+          const spotify = await ytsr(url, {
+            limit: 1,
+            requestOptions: {
+              headers: {
+                Cookie: config.cookies,
+              },
+            },
+          });
+          if (!spotify.items.length) {
+            await interaction.editReply({
+              embeds: [
+                embedCreate({
+                  title: "",
+                  description: "Reason: Make sure you are in a voice channel.",
+                  author: "🎶🎶🎶",
+                  thumbnail:
+                    `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+                    "https://cdn.jacksta.dev/assets/newUser.png",
+                  color: 0x880808,
+                }),
+              ],
+            });
+          }
         }
 
         if (!search.items[0].type.includes("video")) {
@@ -292,6 +318,8 @@ class Player {
       });
 
     this.queue = [];
+
+    this.connection.destroy();
 
     this.audio.stop();
     return true;

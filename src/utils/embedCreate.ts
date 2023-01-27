@@ -31,7 +31,7 @@ export default function embedCreate({
 
   if (fields) {
     fields.forEach((field) => {
-      embed.addFields(...field);
+      embed.addFields(field);
     });
   }
 
