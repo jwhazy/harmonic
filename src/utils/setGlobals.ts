@@ -1,8 +1,16 @@
 import Player from "./player";
 
 export default function setGlobals() {
-  const { GUILD_ID, BOT_TOKEN, NAME, BOT_ID, STATUS, GUILD_COMMANDS, COOKIES } =
-    process.env;
+  const {
+    GUILD_ID,
+    BOT_TOKEN,
+    NAME,
+    BOT_ID,
+    STATUS,
+    GUILD_COMMANDS,
+    COOKIES,
+    DJ_ROLE,
+  } = process.env;
 
   if (!BOT_ID || !GUILD_ID || !BOT_TOKEN) {
     console.error("Missing enviroment variables.");
@@ -18,5 +26,6 @@ export default function setGlobals() {
     status: STATUS || "Get started with /play.",
     guildCommands: GUILD_COMMANDS === "true",
     cookies: COOKIES as string,
+    djRole: DJ_ROLE || "DJ",
   };
 }

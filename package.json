@@ -37,6 +37,6 @@
     "play-dl": "^1.9.6",
     "tweetnacl": "^1.0.3",
     "ytdl-core": "^4.11.2",
-    "ytsr": "^3.8.0"
+    "ytsr": "git+github.com/Yonle/node-ytsr.git#d2f0342"
   }
 }

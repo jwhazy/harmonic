@@ -6,4 +6,5 @@ type Config = {
   status: string;
   guildCommands: boolean;
   cookies: string;
+  djRole: string;
 };

@@ -2,6 +2,7 @@ import {
   SlashCommandBuilder,
   CommandInteraction,
   PermissionsBitField,
+  GuildMemberRoleManager,
 } from "discord.js";
 import Command from "../types/Command";
 import embedCreate from "../utils/embedCreate";
@@ -14,16 +15,15 @@ const restart: Command = {
     .setDescription("Restart the music bot"),
   async run(interaction: CommandInteraction) {
     try {
-      // check if user has Administrator permission
       if (
         (interaction.member?.permissions as PermissionsBitField).has(
           "Administrator"
-        )
+        ) ||
+        interaction.guild?.roles.cache.find((r) => r.name === config.djRole)
       ) {
         global.player.stop(interaction);
         global.player = new Player();
       } else {
-        // if user doesn't have permission, send error message
         await interaction.editReply({
           embeds: [
             embedCreate({
