@@ -1,6 +1,5 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import Command from "../types/Command";
-import { error } from "../utils/logger";
 
 const play: Command = {
   data: new SlashCommandBuilder()
@@ -11,11 +10,7 @@ const play: Command = {
     ),
 
   async run(interaction: CommandInteraction) {
-    try {
-      global.player.play(interaction);
-    } catch (e) {
-      error(e);
-    }
+    global.player.play(interaction);
   },
 };
 
