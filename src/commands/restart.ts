@@ -2,11 +2,10 @@ import {
   SlashCommandBuilder,
   CommandInteraction,
   PermissionsBitField,
-  GuildMemberRoleManager,
 } from "discord.js";
 import Command from "../types/Command";
 import embedCreate from "../utils/embedCreate";
-import { error } from "../utils/logger";
+import handleError from "../utils/handleError";
 import Player from "../utils/player";
 
 const restart: Command = {
@@ -23,6 +22,20 @@ const restart: Command = {
       ) {
         global.player.stop(interaction);
         global.player = new Player();
+
+        await interaction.editReply({
+          embeds: [
+            embedCreate({
+              title: "Restarted.",
+              description: "Restarted successfully.",
+              author: "🎶🎶🎶",
+              thumbnail:
+                `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
+                "https://cdn.jacksta.dev/assets/newUser.png",
+              color: 0x00ff00,
+            }),
+          ],
+        });
       } else {
         await interaction.editReply({
           embeds: [
@@ -39,7 +52,12 @@ const restart: Command = {
         });
       }
     } catch (e) {
-      error(e);
+      handleError(
+        interaction,
+        e,
+        "There was an error restarting the bot!",
+        (e as Error).message
+      );
     }
   },
 };

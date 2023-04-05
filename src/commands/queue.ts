@@ -6,7 +6,7 @@ import {
 import Command from "../types/Command";
 import Song from "../types/Song";
 import embedCreate from "../utils/embedCreate";
-import { error } from "../utils/logger";
+import handleError from "../utils/handleError";
 
 const queue: Command = {
   data: new SlashCommandBuilder()
@@ -57,20 +57,12 @@ const queue: Command = {
 
       return;
     } catch (e) {
-      error(e);
-      await interaction.editReply({
-        embeds: [
-          embedCreate({
-            title: "There was an error fetching the queue.",
-            description: "Please try again later.",
-            author: "🎶🎶🎶",
-            thumbnail:
-              `https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}.png` ||
-              "https://cdn.jacksta.dev/assets/newUser.png",
-            color: 0x880808,
-          }),
-        ],
-      });
+      handleError(
+        interaction,
+        e,
+        "There was an error fetching the queue.",
+        "Please try again later."
+      );
     }
   },
 };
