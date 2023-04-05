@@ -28,15 +28,14 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.9.0",
-    "@discordjs/voice": "^0.13.0",
+    "@discordjs/voice": "^0.16.0",
     "chalk": "4.1.2",
-    "cors": "^2.8.5",
-    "discord.js": "^14.6.0",
+    "discord.js": "^14.9.0",
     "dotenv": "^16.0.3",
     "opusscript": "^0.0.8",
     "play-dl": "^1.9.6",
     "tweetnacl": "^1.0.3",
-    "ytdl-core": "^4.11.2",
-    "ytsr": "git+github.com/Yonle/node-ytsr.git#d2f0342"
+    "ytdl-core": "^4.11.3",
+    "ytsr": "^3.8.1"
   }
 }
