@@ -1,8 +1,9 @@
-import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { CacheType, Interaction, SlashCommandBuilder } from "discord.js";
 
-type Command = {
-  data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
-  run: (interaction: CommandInteraction) => Promise<void>;
+// Will remove this at some point.
+export type Command = {
+  data: SlashCommandBuilder;
+  execute: (interaction: Interaction<CacheType>) => Promise<void>;
 };
 
 export default Command;

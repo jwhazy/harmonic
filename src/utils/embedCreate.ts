@@ -1,5 +1,7 @@
 import { EmbedBuilder } from "discord.js";
 import Embed from "../types/Embed";
+import env from "@/utils/env";
+import { client } from "@/index";
 
 export default function embedCreate({
   title,
@@ -23,9 +25,9 @@ export default function embedCreate({
     .setImage(image || null)
     .setTimestamp(new Date())
     .setFooter({
-      text: global.config.name,
+      text: env.name,
       iconURL:
-        `https://cdn.discordapp.com/avatars/${global.client.user?.id}/${global.client.user?.avatar}.png` ||
+        `https://cdn.discordapp.com/avatars/${client.user?.id}/${client.user?.avatar}.png` ||
         undefined,
     });
 

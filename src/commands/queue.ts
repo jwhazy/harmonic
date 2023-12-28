@@ -1,22 +1,21 @@
-import {
-  SlashCommandBuilder,
-  CommandInteraction,
-  APIEmbedField,
-} from "discord.js";
+import { SlashCommandBuilder, APIEmbedField } from "discord.js";
 import Command from "../types/Command";
 import Song from "../types/Song";
 import embedCreate from "../utils/embedCreate";
 import handleError from "../utils/handleError";
+import player from "@/audio/player";
 
 const queue: Command = {
   data: new SlashCommandBuilder()
     .setName("queue")
     .setDescription("Get the current queue."),
 
-  async run(interaction: CommandInteraction) {
+  async execute(interaction) {
+    if (!interaction.isCommand()) return;
+
     const q: APIEmbedField[] = [];
     try {
-      global.player.queue.forEach((song: Song, index: number) => {
+      player.queue.forEach((song: Song, index: number) => {
         q.push({
           name: `${(index + 1).toString()}. ${song.title || "unknown"}`,
           value: song.url,

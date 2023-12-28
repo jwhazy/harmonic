@@ -1,14 +1,17 @@
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import Command from "../types/Command";
 import embedCreate from "../utils/embedCreate";
+import player from "@/audio/player";
 
 const pause: Command = {
   data: new SlashCommandBuilder()
     .setName("pause")
     .setDescription("Pause the current song."),
 
-  async run(interaction: CommandInteraction) {
-    if (!global.player.pause(interaction)) {
+  async execute(interaction) {
+    if (!interaction.isCommand()) return;
+
+    if (!player.pause(interaction)) {
       await interaction.editReply({
         embeds: [
           embedCreate({

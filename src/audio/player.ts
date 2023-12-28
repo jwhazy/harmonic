@@ -8,32 +8,26 @@ import {
   NoSubscriberBehavior,
 } from "@discordjs/voice";
 import {
-  CommandInteraction,
+  CacheType,
+  Interaction,
   InternalDiscordGatewayAdapterCreator,
 } from "discord.js";
 import ytdl from "ytdl-core";
 import ytsr, { Video } from "ytsr";
-import playDl from "play-dl";
 import Song from "../types/Song";
-import embedCreate from "./embedCreate";
-import { error, log } from "./logger";
-import handleError from "./handleError";
+import embedCreate from "../utils/embedCreate";
+import { error, log } from "../utils/logger";
+import handleError from "../utils/handleError";
+import env from "@/utils/env";
 
 class Player {
-  public audio: AudioPlayer;
-
+  public audio: AudioPlayer = createAudioPlayer({
+    behaviors: {
+      noSubscriber: NoSubscriberBehavior.Play,
+    },
+  });;
   public connection: VoiceConnection | null = null;
-
-  public queue: Song[];
-
-  constructor() {
-    this.audio = createAudioPlayer({
-      behaviors: {
-        noSubscriber: NoSubscriberBehavior.Play,
-      },
-    });
-    this.queue = [];
-  }
+  public queue: Song[] = [];
 
   private async playNext() {
     if (this.queue.length <= 0) {
@@ -44,17 +38,12 @@ class Player {
 
     const song = this.queue[0];
 
-    config.cookies &&
-      playDl.setToken({
-        youtube: {
-          cookie: config.cookies,
-        },
-      });
+    const stream = ytdl(song.url, {
+      filter: "audioonly",
+   
+    });
 
-    const stream = await playDl.stream(song.url);
-
-    const resource = createAudioResource(stream.stream, {
-      inputType: stream.type,
+    const resource = createAudioResource(stream, {
       inlineVolume: true,
     });
 
@@ -75,7 +64,9 @@ class Player {
     });
   }
 
-  public async play(interaction: CommandInteraction) {
+  public async play(interaction: Interaction<CacheType>) {
+    if (!interaction.isCommand()) return;
+
     try {
       let url = interaction.options.get("title")?.value as string;
 
@@ -111,7 +102,7 @@ class Player {
           limit: 1,
           requestOptions: {
             headers: {
-              Cookie: config.cookies,
+              Cookie: env.cookies,
             },
           },
         });
@@ -123,7 +114,7 @@ class Player {
             limit: 1,
             requestOptions: {
               headers: {
-                Cookie: config.cookies,
+                Cookie: env.cookies,
               },
             },
           });
@@ -140,11 +131,11 @@ class Player {
 
       const videoInfo = await ytdl.getBasicInfo(
         url,
-        config.cookies
+        env.cookies
           ? {
               requestOptions: {
                 headers: {
-                  Cookie: config.cookies,
+                  Cookie: env.cookies,
                 },
               },
             }
@@ -216,7 +207,9 @@ class Player {
     }
   }
 
-  public async skip(interaction?: CommandInteraction) {
+  public async skip(interaction?: Interaction<CacheType>) {
+    if (!interaction?.isCommand()) return;
+
     try {
       if (!this.connection || !this.queue.length)
         throw new Error("No song currently playing.");
@@ -225,14 +218,14 @@ class Player {
         await interaction.editReply({
           embeds: [
             embedCreate({
-              title: player.queue[0].title,
+              title: this.queue[0].title,
               description: "Skipped song.",
               author: "🎶🎶🎶",
-              image: player.queue[0].thumbnail,
-              thumbnail: player.queue[0].avatar,
+              image: this.queue[0].thumbnail,
+              thumbnail: this.queue[0].avatar,
 
               color: 0x00ff00,
-              url: player.queue[0].url,
+              url: this.queue[0].url,
             }),
           ],
         });
@@ -253,7 +246,9 @@ class Player {
     }
   }
 
-  public async stop(interaction?: CommandInteraction) {
+  public async stop(interaction?: Interaction<CacheType>) {
+    if (!interaction?.isCommand()) return;
+
     try {
       if (!this.connection || !this.queue.length)
         throw new Error("No song playing.");
@@ -290,7 +285,9 @@ class Player {
     }
   }
 
-  public async pause(interaction?: CommandInteraction) {
+  public async pause(interaction: Interaction<CacheType>) {
+    if (!interaction.isCommand()) return;
+
     try {
       if (!this.connection || !this.queue.length)
         throw new Error("No song playing.");
@@ -323,7 +320,9 @@ class Player {
     }
   }
 
-  public async resume(interaction?: CommandInteraction) {
+  public async resume(interaction: Interaction<CacheType>) {
+    if (!interaction.isCommand()) return;
+
     try {
       if (!this.connection || !this.queue.length)
         throw new Error("No songs playing when trying to resume.");
@@ -357,4 +356,4 @@ class Player {
   }
 }
 
-export default Player;
+export default new Player();

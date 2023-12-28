@@ -1,14 +1,17 @@
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import Command from "../types/Command";
 import embedCreate from "../utils/embedCreate";
+import player from "@/audio/player";
 
 const skip: Command = {
   data: new SlashCommandBuilder()
     .setName("skip")
     .setDescription("Skip the playing current song."),
 
-  async run(interaction: CommandInteraction) {
-    const attempt = global.player.skip(interaction);
+  async execute(interaction) {
+    if (!interaction.isCommand()) return;
+
+    const attempt = player.skip(interaction);
 
     if (!attempt && !interaction.replied) {
       await interaction.editReply({

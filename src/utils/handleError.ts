@@ -1,18 +1,18 @@
-import { CommandInteraction } from "discord.js";
+import { Interaction, CacheType } from "discord.js";
 import embedCreate from "./embedCreate";
 import { error as errorLog } from "./logger";
 
 // eslint-disable-next-line func-names
 export default async function (
-  interaction?: CommandInteraction,
+  interaction?: Interaction<CacheType>,
   error?: unknown | null,
   title?: string,
   reason?: string
 ) {
   errorLog(error || reason);
 
-  interaction &&
-    (await interaction.editReply({
+  if (interaction?.isCommand())
+    await interaction.editReply({
       embeds: [
         embedCreate({
           title: title || "There was an error!",
@@ -24,5 +24,5 @@ export default async function (
           color: 0x880808,
         }),
       ],
-    }));
+    });
 }

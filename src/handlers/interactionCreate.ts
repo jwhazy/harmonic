@@ -1,10 +1,12 @@
+import commands from "@/commands";
 import embedCreate from "../utils/embedCreate";
+import { client } from "@/index";
 
 export default function interactionCreate() {
   client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand()) return;
 
-    const command = global.commands.get(interaction.commandName);
+    const command = commands.get(interaction.commandName);
 
     await interaction.deferReply();
     if (!command) {
@@ -25,7 +27,7 @@ export default function interactionCreate() {
     }
 
     try {
-      await command.run(interaction);
+      await command.execute(interaction);
     } catch (error) {
       console.error(error);
       await interaction.editReply({

@@ -1,7 +1,8 @@
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import Command from "../types/Command";
+import { SlashCommandBuilder } from "discord.js";
+import Command from "@/types/Command";
+import player from "@/audio/player";
 
-const play: Command = {
+const play = {
   data: new SlashCommandBuilder()
     .setName("play")
     .setDescription("Play a song or resume one!")
@@ -9,9 +10,10 @@ const play: Command = {
       option.setName("title").setDescription("The title or URL of the song.")
     ),
 
-  async run(interaction: CommandInteraction) {
-    global.player.play(interaction);
+  async execute(interaction) {
+    if (!interaction.isCommand()) return;
+    player.play(interaction);
   },
-};
+} as Command;
 
 export default play;

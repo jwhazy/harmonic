@@ -1,10 +1,6 @@
-# harmonic
+# harmonic v2
 
-Music bot in TypeScript. Extremely basic. Uses discord.js, ffmpeg and play-dl. A version with an API and frontend is available on the `frontend` branch.
-
-**This bot is designed for private & single server use only, it will not work over multiple servers.**
-
-**Please only use this bot if you have experience in JavaScript/Node.js software. Providing help for Node rookies is beyond the scope of this project, sorry.**
+Music bot in TypeScript. Extremely basic. Uses discord.js.
 
 ## Known issues
 
@@ -14,4 +10,4 @@ Music bot in TypeScript. Extremely basic. Uses discord.js, ffmpeg and play-dl. A
 
 ## Get started
 
-Add related enviroment variables in .env (see .env.example). Install packages with `npm i` or `yarn` and run `yarn start` or `npm run start`.
+Add related enviroment variables in .env (see .env.example). Install packages with `pnpm install` and run the server with `pnpm run start`

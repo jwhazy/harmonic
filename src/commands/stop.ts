@@ -1,14 +1,16 @@
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import Command from "../types/Command";
 import embedCreate from "../utils/embedCreate";
+import player from "../audio/player";
 
 const stop: Command = {
   data: new SlashCommandBuilder()
     .setName("stop")
     .setDescription("Stop playing the current song & clear the queue."),
 
-  async run(interaction: CommandInteraction) {
-    const attempt = global.player.stop(interaction);
+  async execute(interaction) {
+    if (!interaction.isCommand()) return;
+    const attempt = player.stop(interaction);
 
     if (!attempt && !interaction.replied) {
       await interaction.editReply({
