@@ -35,7 +35,7 @@ class Player {
     this.queue = [];
   }
 
-  private async player() {
+  private async playNext() {
     if (this.queue.length <= 0) {
       this.connection?.disconnect();
       this.connection = null;
@@ -67,7 +67,7 @@ class Player {
     this.audio.once(AudioPlayerStatus.Idle, () => {
       this.queue.shift();
 
-      return this.player();
+      return this.playNext();
     });
 
     this.audio.once("error", (e) => {
@@ -169,7 +169,7 @@ class Player {
       });
 
       if (this.audio.state.status !== AudioPlayerStatus.Playing) {
-        this.player();
+        this.playNext();
       }
 
       await interaction.editReply({
@@ -239,7 +239,7 @@ class Player {
 
       this.queue.shift();
 
-      this.player();
+      this.playNext();
 
       return true;
     } catch (e) {
