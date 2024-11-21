@@ -1,30 +1,11 @@
 {
   "name": "harmonic",
-  "version": "2.0.0",
-  "main": "./build/index.js",
-  "repository": "https://github.com/jwhazy/harmonic",
-  "author": "jwhazy",
-  "private": true,
-  "scripts": {
-    "build": "tsc -p .",
-    "prestart": "pnpm build",
-    "start": "node .",
-    "dev": "nodemon"
-  },
+  "module": "index.ts",
+  "type": "module",
   "devDependencies": {
-    "@types/node": "^20.10.5",
-    "nodemon": "^3.0.2",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.3.3"
+    "@types/bun": "latest"
   },
-  "dependencies": {
-    "@discordjs/opus": "^0.9.0",
-    "@discordjs/voice": "^0.16.1",
-    "discord.js": "^14.14.1",
-    "dotenv": "^16.3.1",
-    "libsodium-wrappers": "^0.7.13",
-    "ytdl-core": "^4.11.5",
-    "ytsr": "^3.8.4"
+  "peerDependencies": {
+    "typescript": "^5.0.0"
   }
 }
