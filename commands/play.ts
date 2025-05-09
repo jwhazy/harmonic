@@ -128,7 +128,7 @@ export const play = {
 
 			add(resource, url);
 
-			if (queue.length === 0) {
+			if (queue.length === 1) {
 				playNext(interaction.client);
 
 				await interaction.editReply({
