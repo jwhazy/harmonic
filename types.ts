@@ -1,3 +1,4 @@
+import type { AudioPlayer, VoiceConnection } from "@discordjs/voice";
 import type {
 	CommandInteraction,
 	Collection,
@@ -5,12 +6,15 @@ import type {
 } from "discord.js";
 
 export interface Command {
-	data: SlashCommandBuilder;
-	execute: (interaction: CommandInteraction) => Promise<void>;
+	data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
+	execute: (interaction: CommandInteraction) => Promise<unknown>;
 }
 
 declare module "discord.js" {
 	interface Client {
 		commands: Collection<string, Command>;
+		queue: string[];
+		connection: VoiceConnection | undefined;
+		player: AudioPlayer;
 	}
 }
