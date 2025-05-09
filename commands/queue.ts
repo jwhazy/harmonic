@@ -6,13 +6,17 @@ export const queue = {
 		.setName("queue")
 		.setDescription("View the current queue"),
 	async execute(interaction) {
-		await interaction.editReply("Queue");
+		try {
+			const queue = interaction.client.queue;
 
-		const queue = interaction.client.queue;
-		if (queue.length === 0) {
-			await interaction.editReply("The queue is empty.");
-		} else {
-			await interaction.editReply(`The queue is: ${queue.join(", ")}`);
+			if (queue.length === 0) {
+				return await interaction.editReply("The queue is empty.");
+			}
+
+			return await interaction.editReply(`The queue is: ${queue.join(", ")}`);
+		} catch (error) {
+			console.error(error);
+			return await interaction.editReply("Failed to view the queue");
 		}
 	},
 } satisfies Command;

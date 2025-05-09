@@ -6,8 +6,13 @@ export const pause = {
 		.setName("pause")
 		.setDescription("Pause the current media"),
 	async execute(interaction) {
-		interaction.client.player.pause();
+		try {
+			interaction.client.player.pause();
 
-		await interaction.editReply("Paused the current media");
+			return await interaction.editReply("Paused the current media");
+		} catch (error) {
+			console.error(error);
+			return await interaction.editReply("Failed to pause the current media");
+		}
 	},
 } satisfies Command;
