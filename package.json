@@ -2,10 +2,27 @@
   "name": "harmonic",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "dev": "bun run register-commands && bun run --watch index.ts",
+    "register-commands": "bun run register-commands.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.6.3"
-  }
+  },
+  "dependencies": {
+    "@discordjs/opus": "^0.10.0",
+    "@discordjs/voice": "^0.18.0",
+    "discord.js": "^14.19.3",
+    "ffmpeg-static": "^5.2.0",
+    "libsodium-wrappers": "^0.7.15",
+    "sodium": "^3.0.2"
+  },
+  "trustedDependencies": [
+    "@discordjs/opus",
+    "ffmpeg-static",
+    "sodium"
+  ]
 }
