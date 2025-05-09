@@ -8,8 +8,6 @@ export const stop = {
 	async execute(interaction) {
 		try {
 			interaction.client.player.stop();
-			interaction.client.player.removeAllListeners();
-
 			interaction.client.queue = [];
 
 			if (interaction.client.connection) {
