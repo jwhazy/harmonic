@@ -1,4 +1,3 @@
-import type { CommandInteraction } from "discord.js";
 import { Readable } from "node:stream";
 import { createAudioResource, joinVoiceChannel } from "@discordjs/voice";
 import { SlashCommandBuilder } from "discord.js";
@@ -18,7 +17,7 @@ export const play = {
 				.setRequired(true),
 		) as SlashCommandBuilder,
 
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction) {
 		try {
 			const user = interaction.member?.user;
 			if (!user) {
@@ -114,12 +113,16 @@ export const play = {
 			// Pull the file from the URL
 			console.log("Pulling file from URL:", response.url);
 			interaction.editReply(`${env.LOADING_EMOJI} Pulling file from servers`);
+
 			const file = await fetch(response.url);
 			const arrayBuffer = await file.arrayBuffer();
 			const buffer = Buffer.from(arrayBuffer);
+
 			interaction.editReply(`${env.LOADING_EMOJI} Converting file to buffer`);
+
 			const stream = Readable.from(buffer);
 			interaction.editReply(`${env.LOADING_EMOJI} Streaming file`);
+
 			const resource = createAudioResource(stream);
 
 			// Ensure we have a voice connection
