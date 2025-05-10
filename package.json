@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --watch index.ts",
-    "dev:commands": "bun run register-commands.ts",
+    "commands": "bun run register-commands.ts",
     "start": "NODE_ENV=production bun run index.ts"
   },
   "devDependencies": {

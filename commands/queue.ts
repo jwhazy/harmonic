@@ -24,7 +24,7 @@ export const queue = {
 			const queueItems = globalQueue.map((item, index) => format(item, index));
 
 			return await interaction.editReply({
-				content: `**Coming up:**${queueItems.join("\n")}`,
+				content: `${env.SUCCESS_EMOJI} **Coming up:**${queueItems.join("\n")}`,
 				allowedMentions: { repliedUser: false },
 			});
 		} catch (error) {
