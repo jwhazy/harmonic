@@ -3,8 +3,8 @@ import { createAudioResource, joinVoiceChannel } from "@discordjs/voice";
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "../types";
 import { add, playNext, queue } from "../queue";
-import type { CobaltResponse } from "../cobalt/types";
 import env from "../env";
+import { z, ZodError } from "zod";
 
 export const play = {
 	data: new SlashCommandBuilder()
@@ -19,60 +19,34 @@ export const play = {
 
 	async execute(interaction) {
 		try {
-			const user = interaction.member?.user;
-			if (!user) {
+			interaction.editReply(`${env.LOADING_EMOJI} Running checks`);
+
+			const member = interaction.member;
+			if (!member || !("voice" in member)) {
 				return interaction.editReply({
 					content: `${env.FAIL_EMOJI} You must be in a voice channel to use this command.`,
 				});
 			}
 
-			const guildUser = interaction.guild?.members.cache.get(user.id);
-			if (!guildUser) {
-				return interaction.editReply({
-					content: `${env.FAIL_EMOJI} You must be in a voice channel to use this command.`,
-				});
-			}
-
-			const channel = guildUser.voice.channel;
+			const channel = member.voice.channel;
 			if (!channel) {
 				return interaction.editReply({
 					content: `${env.FAIL_EMOJI} You must be in a voice channel to use this command.`,
 				});
 			}
 
-			interaction.editReply(`${env.LOADING_EMOJI} Getting ready`);
+			const url = z.string().url().parse(interaction.options.get("url")?.value);
 
-			const data = interaction.options.get("url");
+			interaction.editReply(`${env.LOADING_EMOJI} Processing your request`);
 
-			if (!data) {
-				return interaction.editReply({
-					content: `${env.FAIL_EMOJI} You must provide a URL to play.`,
-				});
-			}
+			const response = await interaction.client.cobalt.processUrl({
+				url: url,
+				audioFormat: "mp3",
+				filenameStyle: "basic",
+				downloadMode: "audio",
+			});
 
-			const url = data.value as string;
-
-			// God I hate doing this
-			let response: CobaltResponse | undefined = undefined;
-
-			try {
-				console.log("Processing URL:", url);
-				interaction.editReply(
-					`${env.LOADING_EMOJI} Processing your request with Cobalt`,
-				);
-				response = await interaction.client.cobalt.processUrl({
-					url: url,
-					audioFormat: "mp3",
-					filenameStyle: "basic",
-					downloadMode: "audio",
-				});
-			} catch (error) {
-				console.error("Failed to process URL with Cobalt:", {
-					url,
-					error,
-					timestamp: new Date().toISOString(),
-				});
-			}
+			console.log("Processing URL:", url);
 
 			if (!response) {
 				return interaction.editReply({
@@ -84,7 +58,17 @@ export const play = {
 				// TODO: Edit this Copilot generated slop
 
 				const errorMessage = response.error
-					? `${env.FAIL_EMOJI} Cobalt couldn't complete this request. Error: ${response.error.code}${response.error.context?.service ? ` (Service: ${response.error.context.service})` : ""}${response.error.context?.limit ? ` (Limit: ${response.error.context.limit})` : ""}`
+					? `${env.FAIL_EMOJI} Cobalt couldn't complete this request. Error: ${
+							response.error.code
+						}${
+							response.error.context?.service
+								? ` (Service: ${response.error.context.service})`
+								: ""
+						}${
+							response.error.context?.limit
+								? ` (Limit: ${response.error.context.limit})`
+								: ""
+						}`
 					: `${env.FAIL_EMOJI} Cobalt couldn't complete this request. Error: While processing media.`;
 
 				console.error("Cobalt API Error:", {
@@ -115,10 +99,11 @@ export const play = {
 			interaction.editReply(`${env.LOADING_EMOJI} Pulling file from servers`);
 
 			const file = await fetch(response.url);
-			const arrayBuffer = await file.arrayBuffer();
-			const buffer = Buffer.from(arrayBuffer);
 
 			interaction.editReply(`${env.LOADING_EMOJI} Converting file to buffer`);
+
+			const arrayBuffer = await file.arrayBuffer();
+			const buffer = Buffer.from(arrayBuffer);
 
 			const stream = Readable.from(buffer);
 			interaction.editReply(`${env.LOADING_EMOJI} Streaming file`);
@@ -126,7 +111,10 @@ export const play = {
 			const resource = createAudioResource(stream);
 
 			// Ensure we have a voice connection
-			if (!interaction.client.connection) {
+			if (
+				!interaction.client.connection ||
+				interaction.client.connection.state.status === "disconnected"
+			) {
 				interaction.client.connection = joinVoiceChannel({
 					channelId: channel.id,
 					guildId: channel.guild.id,
@@ -151,22 +139,28 @@ export const play = {
 					.trim();
 			}
 
-			add(resource, url, user.id, title, author);
+			add(resource, url, member.id, title, author);
 
 			if (queue.length === 1) {
 				playNext(interaction.client);
 
-				await interaction.editReply(
+				return interaction.editReply(
 					`${env.SUCCESS_EMOJI} Now playing: **${title}** by **${author}**`,
 				);
-			} else {
-				await interaction.editReply(
-					`${env.SUCCESS_EMOJI} Added to queue: **${title}** by **${author}**`,
-				);
 			}
+
+			return interaction.editReply(
+				`${env.SUCCESS_EMOJI} Added to queue: **${title}** by **${author}**`,
+			);
 		} catch (error) {
+			if (error instanceof ZodError) {
+				return interaction.editReply({
+					content: `${env.FAIL_EMOJI} You must provide a URL to play.`,
+				});
+			}
+
 			console.error(error);
-			return await interaction.editReply(
+			return interaction.editReply(
 				`${env.FAIL_EMOJI} Failed to play the media`,
 			);
 		}
