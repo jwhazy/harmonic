@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "../types";
 import env from "../env";
+import { queue } from "../queue";
 
 export const skip = {
 	data: new SlashCommandBuilder()
@@ -8,6 +9,15 @@ export const skip = {
 		.setDescription("Skip the current media"),
 	async execute(interaction) {
 		try {
+			if (
+				queue.length === 0 ||
+				interaction.client.player.state.status === "idle"
+			) {
+				return await interaction.editReply(
+					`${env.FAIL_EMOJI} There is no media to skip`,
+				);
+			}
+
 			interaction.client.player.stop();
 
 			return await interaction.editReply(

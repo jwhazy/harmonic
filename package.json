@@ -1,6 +1,7 @@
 {
   "name": "harmonic",
   "module": "index.ts",
+  "version": "3.0.0",
   "type": "module",
   "scripts": {
     "dev": "bun run --watch index.ts",

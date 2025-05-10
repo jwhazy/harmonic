@@ -1,12 +1,35 @@
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "../types";
 import env from "../env";
+import { queue } from "../queue";
+
 export const resume = {
 	data: new SlashCommandBuilder()
 		.setName("resume")
 		.setDescription("Resume the current media"),
 	async execute(interaction) {
 		try {
+			if (
+				interaction.client.player.state.status === "idle" ||
+				queue.length === 0
+			) {
+				return await interaction.editReply(
+					`${env.FAIL_EMOJI} There is no media playing`,
+				);
+			}
+
+			if (interaction.client.player.state.status === "playing") {
+				return await interaction.editReply(
+					`${env.FAIL_EMOJI} The current media is already playing`,
+				);
+			}
+
+			if (interaction.client.player.state.status !== "paused") {
+				return await interaction.editReply(
+					`${env.FAIL_EMOJI} The current media is not paused`,
+				);
+			}
+
 			interaction.client.player.unpause();
 
 			return await interaction.editReply(
