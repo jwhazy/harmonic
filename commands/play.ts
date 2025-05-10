@@ -84,8 +84,8 @@ export const play = {
 				// TODO: Edit this Copilot generated slop
 
 				const errorMessage = response.error
-					? `Error processing media: ${response.error.code}${response.error.context?.service ? ` (Service: ${response.error.context.service})` : ""}${response.error.context?.limit ? ` (Limit: ${response.error.context.limit})` : ""}`
-					: "Error processing media.";
+					? `${env.FAIL_EMOJI} Cobalt couldn't complete this request. Error: ${response.error.code}${response.error.context?.service ? ` (Service: ${response.error.context.service})` : ""}${response.error.context?.limit ? ` (Limit: ${response.error.context.limit})` : ""}`
+					: `${env.FAIL_EMOJI} Cobalt couldn't complete this request. Error: While processing media.`;
 
 				console.error("Cobalt API Error:", {
 					url,
