@@ -4,6 +4,7 @@ import type {
 	Collection,
 	SlashCommandBuilder,
 } from "discord.js";
+import type { Cobalt } from "./cobalt/api";
 
 export interface Command {
 	data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
@@ -13,8 +14,8 @@ export interface Command {
 declare module "discord.js" {
 	interface Client {
 		commands: Collection<string, Command>;
-		queue: string[];
 		connection: VoiceConnection | undefined;
 		player: AudioPlayer;
+		cobalt: Cobalt;
 	}
 }

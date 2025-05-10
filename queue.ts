@@ -4,12 +4,25 @@ import type { Client } from "discord.js";
 type QueueItem = {
 	resource: AudioResource;
 	url: string;
+	requestedBy: string;
+	title: string;
+	author: string;
 };
 
-export const queue: QueueItem[] = [];
+export let queue: QueueItem[] = [];
 
-export function add(resource: AudioResource, url: string) {
-	queue.push({ resource, url });
+export function clear() {
+	queue = [];
+}
+
+export function add(
+	resource: AudioResource,
+	url: string,
+	requestedBy: string,
+	title: string,
+	author: string,
+) {
+	queue.push({ resource, url, requestedBy, title, author });
 }
 
 export function playNext(client: Client) {

@@ -1,11 +1,9 @@
-import { Client, Events, MessageFlags, Collection } from "discord.js";
+import { Client, Events, Collection } from "discord.js";
 import env from "./env";
 import commands from "./commands";
 import { Cobalt } from "./cobalt/api";
 import { AudioPlayer, AudioPlayerStatus } from "@discordjs/voice";
 import { playNext, queue } from "./queue";
-
-export const cobalt = new Cobalt(env.COBALT_URL, env.COBALT_KEY);
 
 export const client = new Client({
 	intents: [
@@ -14,7 +12,16 @@ export const client = new Client({
 	],
 });
 
-client.once(Events.ClientReady, (client) => {
+client.once(Events.ClientReady, async (client) => {
+	client.cobalt = new Cobalt(env.COBALT_URL, env.COBALT_KEY);
+
+	try {
+		await client.cobalt.getServerInfo();
+	} catch (error) {
+		console.error(error);
+		throw new Error("Could not connect to your Cobalt instance");
+	}
+
 	console.log(`Ready! Logged in as ${client.user.tag}`);
 
 	client.commands = new Collection(
@@ -33,6 +40,13 @@ client.once(Events.ClientReady, (client) => {
 			console.log(`Now playing: ${nextUrl}`);
 		}
 	});
+
+	client.user.setPresence({
+		activities: [
+			{ name: env.ACTIVITY ?? `Use @${client.user.username}`, type: 0 },
+		],
+		status: "online",
+	});
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -42,13 +56,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 	if (!command) {
 		console.error(`No command matching ${interaction.commandName} was found.`);
+		await interaction.reply({
+			content: `${env.FAIL_EMOJI} There was an error while executing this command!`,
+		});
 		return;
 	}
 
 	try {
-		await interaction.deferReply({
-			flags: MessageFlags.Ephemeral,
-		});
+		await interaction.deferReply();
 
 		await command.execute(interaction);
 	} catch (error) {
@@ -56,13 +71,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		try {
 			if (interaction.replied || interaction.deferred) {
 				await interaction.followUp({
-					content: "There was an error while executing this command!",
-					flags: MessageFlags.Ephemeral,
+					content: `${env.FAIL_EMOJI} There was an error while executing this command!`,
 				});
 			} else {
-				await interaction.reply({
-					content: "There was an error while executing this command!",
-					flags: MessageFlags.Ephemeral,
+				await interaction.editReply({
+					content: `${env.FAIL_EMOJI} There was an error while executing this command!`,
 				});
 			}
 		} catch (replyError) {

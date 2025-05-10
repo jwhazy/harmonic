@@ -6,4 +6,8 @@ import { queue } from "./queue";
 import { skip } from "./skip";
 import { stop } from "./stop";
 
-export default [play, pause, resume, queue, skip, stop] satisfies Command[];
+const commands = [play, pause, resume, queue, skip, stop];
+
+export const commandData = commands.map((command) => command.data);
+
+export default commands satisfies Command[];

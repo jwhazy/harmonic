@@ -1,22 +1,37 @@
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "../types";
+import { queue as globalQueue } from "../queue";
+import env from "../env";
 
 export const queue = {
 	data: new SlashCommandBuilder()
 		.setName("queue")
 		.setDescription("View the current queue"),
 	async execute(interaction) {
-		try {
-			const queue = interaction.client.queue;
+		function format(item: (typeof globalQueue)[number], index: number) {
+			if (index === 0) return "";
 
-			if (queue.length === 0) {
-				return await interaction.editReply("The queue is empty.");
+			return `${index}: **${item.title}** - <@${item.requestedBy}>`;
+		}
+
+		try {
+			if (globalQueue.length <= 1) {
+				return await interaction.editReply(
+					`${env.FAIL_EMOJI} The queue is empty.`,
+				);
 			}
 
-			return await interaction.editReply(`The queue is: ${queue.join(", ")}`);
+			const queueItems = globalQueue.map((item, index) => format(item, index));
+
+			return await interaction.editReply({
+				content: `**Coming up:**${queueItems.join("\n")}`,
+				allowedMentions: { repliedUser: false },
+			});
 		} catch (error) {
 			console.error(error);
-			return await interaction.editReply("Failed to view the queue");
+			return await interaction.editReply(
+				`${env.FAIL_EMOJI} Failed to view the queue`,
+			);
 		}
 	},
 } satisfies Command;

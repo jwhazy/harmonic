@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "../types";
+import env from "../env";
 
 export const pause = {
 	data: new SlashCommandBuilder()
@@ -9,10 +10,14 @@ export const pause = {
 		try {
 			interaction.client.player.pause();
 
-			return await interaction.editReply("Paused the current media");
+			return await interaction.editReply(
+				`${env.SUCCESS_EMOJI} Paused the current media`,
+			);
 		} catch (error) {
 			console.error(error);
-			return await interaction.editReply("Failed to pause the current media");
+			return await interaction.editReply(
+				`${env.FAIL_EMOJI} Failed to pause the current media`,
+			);
 		}
 	},
 } satisfies Command;
