@@ -15,6 +15,10 @@ export const stop = {
 			if (interaction.client.connection) {
 				interaction.client.connection.destroy();
 				interaction.client.connection = undefined;
+				if (interaction.client.autoDisconnectTimeout) {
+					clearTimeout(interaction.client.autoDisconnectTimeout);
+					interaction.client.autoDisconnectTimeout = undefined;
+				}
 			}
 		} catch (error) {
 			console.error(error);

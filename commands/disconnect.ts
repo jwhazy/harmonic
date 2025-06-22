@@ -16,6 +16,10 @@ export const disconnect = {
 
 			interaction.client.connection.destroy();
 			interaction.client.connection = undefined;
+			if (interaction.client.autoDisconnectTimeout) {
+				clearTimeout(interaction.client.autoDisconnectTimeout);
+				interaction.client.autoDisconnectTimeout = undefined;
+			}
 
 			return interaction.editReply(
 				`${env.SUCCESS_EMOJI} Disconnected from the voice channel`,

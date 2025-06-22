@@ -38,6 +38,25 @@ client.once(Events.ClientReady, async (client) => {
 
 		if (nextUrl) {
 			console.log(`Now playing: ${nextUrl}`);
+			if (client.autoDisconnectTimeout) {
+				clearTimeout(client.autoDisconnectTimeout);
+				client.autoDisconnectTimeout = undefined;
+			}
+		} else {
+			if (client.autoDisconnectTimeout) {
+				clearTimeout(client.autoDisconnectTimeout);
+			}
+			client.autoDisconnectTimeout = setTimeout(
+				() => {
+					if (client.connection) {
+						client.connection.destroy();
+						client.connection = undefined;
+						console.log("Disconnected due to inactivity.");
+					}
+					client.autoDisconnectTimeout = undefined;
+				},
+				5 * 60 * 1000,
+			);
 		}
 	});
 

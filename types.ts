@@ -17,5 +17,6 @@ declare module "discord.js" {
 		connection: VoiceConnection | undefined;
 		player: AudioPlayer;
 		cobalt: Cobalt;
+		autoDisconnectTimeout?: NodeJS.Timeout;
 	}
 }

@@ -144,6 +144,11 @@ export const play = {
 			add(resource, url, member.id, title, author);
 
 			if (queue.length === 1) {
+				// Reset auto-disconnect timer when starting playback
+				if (interaction.client.autoDisconnectTimeout) {
+					clearTimeout(interaction.client.autoDisconnectTimeout);
+					interaction.client.autoDisconnectTimeout = undefined;
+				}
 				playNext(interaction.client);
 
 				return interaction.editReply(
