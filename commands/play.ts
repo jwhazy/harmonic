@@ -96,11 +96,11 @@ export const play = {
 
 			// Pull the file from the URL
 			console.log("Pulling file from URL:", response.url);
-			interaction.editReply(`${env.LOADING_EMOJI} Pulling file from servers`);
+			interaction.editReply(`${env.LOADING_EMOJI} Requesting file`);
 
 			const file = await fetch(response.url);
 
-			interaction.editReply(`${env.LOADING_EMOJI} Converting file to buffer`);
+			interaction.editReply(`${env.LOADING_EMOJI} Pulling file from servers`);
 
 			const arrayBuffer = await file.arrayBuffer();
 			const buffer = Buffer.from(arrayBuffer);
@@ -115,6 +115,7 @@ export const play = {
 				!interaction.client.connection ||
 				interaction.client.connection.state.status === "disconnected"
 			) {
+				interaction.editReply(`${env.LOADING_EMOJI} Joining voice channel`);
 				interaction.client.connection = joinVoiceChannel({
 					channelId: channel.id,
 					guildId: channel.guild.id,
@@ -131,6 +132,7 @@ export const play = {
 			let title = fileName;
 			let author = "unknown";
 
+			// Hack to get data from file name
 			const lastDashIndex = fileName.lastIndexOf(" - ");
 			if (lastDashIndex !== -1) {
 				title = fileName.substring(0, lastDashIndex).trim();
