@@ -1,41 +1,31 @@
 {
   "name": "harmonic",
-  "version": "0.0.0",
-  "main": "./build/index.js",
-  "repository": "https://github.com/jwhazy/harmonic",
-  "author": "jwhazy",
-  "private": true,
+  "module": "index.ts",
+  "version": "3.0.0",
+  "type": "module",
   "scripts": {
-    "build": "tsc -p .",
-    "prestart": "yarn build",
-    "start": "node .",
-    "dev": "nodemon"
+    "dev": "bun run --watch index.ts",
+    "commands": "bun run register-commands.ts",
+    "start": "NODE_ENV=production bun run index.ts"
   },
   "devDependencies": {
-    "@types/node": "^18.11.9",
-    "@typescript-eslint/eslint-plugin": "^5.44.0",
-    "@typescript-eslint/parser": "^5.44.0",
-    "eslint": "^8.28.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-airbnb-typescript": "^17.0.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "nodemon": "^2.0.20",
-    "prettier": "^2.8.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.3"
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@discordjs/opus": "^0.9.0",
-    "@discordjs/voice": "^0.16.0",
-    "chalk": "4.1.2",
-    "discord.js": "^14.11.0",
-    "dotenv": "^16.0.3",
-    "opusscript": "^0.1.0",
-    "play-dl": "^1.9.6",
-    "tweetnacl": "^1.0.3",
-    "ytdl-core": "^4.11.4",
-    "ytsr": "^3.8.2"
-  }
+    "@discordjs/opus": "^0.10.0",
+    "@discordjs/voice": "^0.18.0",
+    "discord.js": "^14.21.0",
+    "ffmpeg-static": "^5.2.0",
+    "libsodium-wrappers": "^0.7.15",
+    "sodium": "^3.0.2",
+    "zod": "^3.25.76"
+  },
+  "trustedDependencies": [
+    "@discordjs/opus",
+    "ffmpeg-static",
+    "sodium"
+  ]
 }
