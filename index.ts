@@ -1,8 +1,4 @@
-import {
-	Client,
-	Events,
-	Collection,
-} from "discord.js";
+import { Client, Events, Collection } from "discord.js";
 import env from "./env";
 import commands from "./commands";
 import { Cobalt } from "./cobalt/api";
@@ -17,15 +13,6 @@ export const client = new Client({
 });
 
 client.once(Events.ClientReady, async (client) => {
-	client.cobalt = new Cobalt(env.COBALT_URL, env.COBALT_KEY);
-
-	try {
-		await client.cobalt.getServerInfo();
-	} catch (error) {
-		console.error(error);
-		throw new Error("Could not connect to your Cobalt instance");
-	}
-
 	console.log(`Ready! Logged in as ${client.user.tag}`);
 
 	client.commands = new Collection(
