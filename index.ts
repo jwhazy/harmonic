@@ -1,4 +1,8 @@
-import { Client, Events, Collection } from "discord.js";
+import {
+	Client,
+	Events,
+	Collection,
+} from "discord.js";
 import env from "./env";
 import commands from "./commands";
 import { Cobalt } from "./cobalt/api";
@@ -7,8 +11,8 @@ import { playNext, queue } from "./queue";
 
 export const client = new Client({
 	intents: [
-		1, 2, 4, 8, 16, 32, 64, 128, 256, 1024, 2048, 4096, 8192, 16384, 32768,
-		65536, 1048576, 2097152,
+		1, 2, 4, 4, 8, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384,
+		32768, 65536, 1048576, 2097152, 16777216, 33554432,
 	],
 });
 
