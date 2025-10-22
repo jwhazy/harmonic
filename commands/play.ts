@@ -1,15 +1,20 @@
-import { Readable } from "node:stream";
 import { createAudioResource, joinVoiceChannel } from "@discordjs/voice";
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "../types";
 import { add, playNext, queue } from "../queue";
 import env from "../env";
 import { z, ZodError } from "zod";
+import {
+	downloadAudio,
+	createStreamFromFile,
+	getSongInfo,
+} from "../yt-dlp/api";
+import path from "node:path";
 
 export const play = {
 	data: new SlashCommandBuilder()
 		.setName("play")
-		.setDescription("Play media through Cobalt")
+		.setDescription("Play media from a URL")
 		.addStringOption((option) =>
 			option
 				.setName("url")
@@ -35,79 +40,31 @@ export const play = {
 				});
 			}
 
-			const url = z.string().url().parse(interaction.options.get("url")?.value);
+			const url = z.url().parse(interaction.options.get("url")?.value);
 
-			interaction.editReply(`${env.LOADING_EMOJI} Processing your request`);
+			interaction.editReply(`${env.LOADING_EMOJI} Fetching song information`);
 
-			const response = await interaction.client.cobalt.processUrl({
-				url: url,
-				audioFormat: "mp3",
-				filenameStyle: "basic",
-				downloadMode: "audio",
-			});
+			const audioDir = path.join(process.cwd(), "audios");
 
-			console.log("Processing URL:", url);
+			let { author, title, videoId, filePath } = await getSongInfo(url);
 
-			if (!response) {
-				return interaction.editReply({
-					content: `${env.FAIL_EMOJI} Error processing media: No response from service.`,
-				});
+			if (filePath) {
+				interaction.editReply(
+					`${env.LOADING_EMOJI} Found **${title}** by **${author}** in cache`,
+				);
+			} else {
+				interaction.editReply(
+					`${env.LOADING_EMOJI} Downloading **${title}** by **${author}**`,
+				);
+
+				filePath = await downloadAudio(videoId, url, audioDir);
 			}
 
-			if (response.status === "error") {
-				// TODO: Edit this Copilot generated slop
+			interaction.editReply(
+				`${env.LOADING_EMOJI} Creating audio stream for **${title}**`,
+			);
 
-				const errorMessage = response.error
-					? `${env.FAIL_EMOJI} Cobalt couldn't complete this request. Error: ${
-							response.error.code
-						}${
-							response.error.context?.service
-								? ` (Service: ${response.error.context.service})`
-								: ""
-						}${
-							response.error.context?.limit
-								? ` (Limit: ${response.error.context.limit})`
-								: ""
-						}`
-					: `${env.FAIL_EMOJI} Cobalt couldn't complete this request. Error: While processing media.`;
-
-				console.error("Cobalt API Error:", {
-					url,
-					error: response.error,
-					timestamp: new Date().toISOString(),
-				});
-
-				return interaction.editReply({
-					content: errorMessage,
-				});
-			}
-
-			if (!response.url) {
-				console.error("Cobalt API Error: No URL in response", {
-					url,
-					response,
-					timestamp: new Date().toISOString(),
-				});
-
-				return interaction.editReply({
-					content: `${env.FAIL_EMOJI} Error processing media: No URL returned from service.`,
-				});
-			}
-
-			// Pull the file from the URL
-			console.log("Pulling file from URL:", response.url);
-			interaction.editReply(`${env.LOADING_EMOJI} Requesting file`);
-
-			const file = await fetch(response.url);
-
-			interaction.editReply(`${env.LOADING_EMOJI} Pulling file from servers`);
-
-			const arrayBuffer = await file.arrayBuffer();
-			const buffer = Buffer.from(arrayBuffer);
-
-			const stream = Readable.from(buffer);
-			interaction.editReply(`${env.LOADING_EMOJI} Streaming file`);
-
+			const stream = createStreamFromFile(filePath);
 			const resource = createAudioResource(stream);
 
 			// Ensure we have a voice connection
@@ -126,20 +83,6 @@ export const play = {
 			}
 
 			interaction.editReply(`${env.LOADING_EMOJI} Adding to queue`);
-
-			const fileName = response.filename || "unknown - unknown";
-
-			let title = fileName;
-			let author = "unknown";
-
-			// Hack to get data from file name
-			const lastDashIndex = fileName.lastIndexOf(" - ");
-			if (lastDashIndex !== -1) {
-				title = fileName.substring(0, lastDashIndex).trim();
-				author = fileName
-					.substring(lastDashIndex + 3, fileName.lastIndexOf("."))
-					.trim();
-			}
 
 			add(resource, url, member.id, title, author);
 

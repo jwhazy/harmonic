@@ -7,21 +7,12 @@ import { playNext, queue } from "./queue";
 
 export const client = new Client({
 	intents: [
-		1, 2, 4, 8, 16, 32, 64, 128, 256, 1024, 2048, 4096, 8192, 16384, 32768,
-		65536, 1048576, 2097152,
+		1, 2, 4, 4, 8, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384,
+		32768, 65536, 1048576, 2097152, 16777216, 33554432,
 	],
 });
 
 client.once(Events.ClientReady, async (client) => {
-	client.cobalt = new Cobalt(env.COBALT_URL, env.COBALT_KEY);
-
-	try {
-		await client.cobalt.getServerInfo();
-	} catch (error) {
-		console.error(error);
-		throw new Error("Could not connect to your Cobalt instance");
-	}
-
 	console.log(`Ready! Logged in as ${client.user.tag}`);
 
 	client.commands = new Collection(
