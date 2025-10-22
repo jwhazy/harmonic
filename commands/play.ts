@@ -40,33 +40,31 @@ export const play = {
 				});
 			}
 
-			const url = z.string().url().parse(interaction.options.get("url")?.value);
+			const url = z.url().parse(interaction.options.get("url")?.value);
 
 			interaction.editReply(`${env.LOADING_EMOJI} Fetching song information`);
 
 			const audioDir = path.join(process.cwd(), "audios");
 
-			const song = await getSongInfo(url);
+			let { author, title, videoId, filePath } = await getSongInfo(url);
 
-			if (song.filePath) {
+			if (filePath) {
 				interaction.editReply(
-					`${env.LOADING_EMOJI} Found **${song.title}** by **${song.author}** in cache`,
+					`${env.LOADING_EMOJI} Found **${title}** by **${author}** in cache`,
 				);
 			} else {
 				interaction.editReply(
-					`${env.LOADING_EMOJI} Downloading **${song.title}** by **${song.author}**`,
+					`${env.LOADING_EMOJI} Downloading **${title}** by **${author}**`,
 				);
 
-				song.filePath = await downloadAudio(song.videoId, url, audioDir);
+				filePath = await downloadAudio(videoId, url, audioDir);
 			}
 
-			console.log("Downloaded:", song);
-
 			interaction.editReply(
-				`${env.LOADING_EMOJI} Creating audio stream for **${song.title}**`,
+				`${env.LOADING_EMOJI} Creating audio stream for **${title}**`,
 			);
 
-			const stream = createStreamFromFile(song.filePath);
+			const stream = createStreamFromFile(filePath);
 			const resource = createAudioResource(stream);
 
 			// Ensure we have a voice connection
@@ -86,7 +84,7 @@ export const play = {
 
 			interaction.editReply(`${env.LOADING_EMOJI} Adding to queue`);
 
-			add(resource, url, member.id, song.title, song.author);
+			add(resource, url, member.id, title, author);
 
 			if (queue.length === 1) {
 				// Reset auto-disconnect timer when starting playback
@@ -97,12 +95,12 @@ export const play = {
 				playNext(interaction.client);
 
 				return interaction.editReply(
-					`${env.SUCCESS_EMOJI} Now playing: **${song.title}** by **${song.author}**`,
+					`${env.SUCCESS_EMOJI} Now playing: **${title}** by **${author}**`,
 				);
 			}
 
 			return interaction.editReply(
-				`${env.SUCCESS_EMOJI} Added to queue: **${song.title}** by **${song.author}**`,
+				`${env.SUCCESS_EMOJI} Added to queue: **${title}** by **${author}**`,
 			);
 		} catch (error) {
 			if (error instanceof ZodError) {
