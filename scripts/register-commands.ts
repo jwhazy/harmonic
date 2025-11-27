@@ -1,6 +1,6 @@
 import { REST, Routes } from "discord.js";
-import env from "./env";
-import { commandData } from "./commands";
+import { commandData } from "../commands";
+import env from "../utils/env";
 
 const rest = new REST().setToken(env.TOKEN);
 

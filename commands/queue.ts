@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
-import type { Command } from "../types";
 import { queue as globalQueue } from "../queue";
-import env from "../env";
+import env from "../utils/env";
+import type { Command } from "../utils/types";
 
 export const queue = {
 	data: new SlashCommandBuilder()

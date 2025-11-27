@@ -1,7 +1,12 @@
 import { env } from "bun";
-
 import { z } from "zod";
 
+/**
+ *  **Environment variables schema validation**
+ *
+ *  To use these variables assign them (with the same name) in .env with the usual syntax
+ *  They will autopopulate with the correct type and will throw errors if something is missing.
+ */
 const envSchema = z.object({
 	TOKEN: z.string(),
 	CLIENT_ID: z.string(),

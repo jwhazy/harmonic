@@ -1,15 +1,12 @@
+import { createReadStream } from "node:fs";
+import path from "node:path";
 import { createAudioResource, joinVoiceChannel } from "@discordjs/voice";
 import { SlashCommandBuilder } from "discord.js";
-import type { Command } from "../types";
+import { ZodError, z } from "zod";
 import { add, playNext, queue } from "../queue";
-import env from "../env";
-import { z, ZodError } from "zod";
-import {
-	downloadAudio,
-	createStreamFromFile,
-	getSongInfo,
-} from "../yt-dlp/api";
-import path from "node:path";
+import env from "../utils/env";
+import type { Command } from "../utils/types";
+import { downloadAudio, getSongInfo } from "../yt-dlp/api";
 
 export const play = {
 	data: new SlashCommandBuilder()
@@ -64,7 +61,7 @@ export const play = {
 				`${env.LOADING_EMOJI} Creating audio stream for **${title}**`,
 			);
 
-			const stream = createStreamFromFile(filePath);
+			const stream = createReadStream(filePath);
 			const resource = createAudioResource(stream);
 
 			// Ensure we have a voice connection

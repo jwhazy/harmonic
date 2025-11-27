@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
-import type { Command } from "../types";
-import env from "../env";
+import env from "../utils/env";
+import type { Command } from "../utils/types";
 
 export const disconnect = {
 	data: new SlashCommandBuilder()
@@ -16,6 +16,7 @@ export const disconnect = {
 
 			interaction.client.connection.destroy();
 			interaction.client.connection = undefined;
+
 			if (interaction.client.autoDisconnectTimeout) {
 				clearTimeout(interaction.client.autoDisconnectTimeout);
 				interaction.client.autoDisconnectTimeout = undefined;

@@ -1,13 +1,6 @@
 import type { AudioResource } from "@discordjs/voice";
 import type { Client } from "discord.js";
-
-type QueueItem = {
-	resource: AudioResource;
-	url: string;
-	requestedBy: string;
-	title: string;
-	author: string;
-};
+import type { QueueItem } from "./utils/types";
 
 export let queue: QueueItem[] = [];
 
@@ -28,10 +21,10 @@ export function add(
 export function playNext(client: Client) {
 	const next = queue[0];
 
-	if (next) {
-		client.player.play(next.resource);
-		return next.url;
+	if (!next) {
+		return;
 	}
 
-	return;
+	client.player.play(next.resource);
+	return next.url;
 }

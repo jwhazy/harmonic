@@ -4,8 +4,9 @@
 	"version": "3.0.0",
 	"type": "module",
 	"scripts": {
+		"commands": "bun run scripts/register-commands.ts",
+		"deps": "bun run scripts/dependency-checks.ts",
 		"dev": "bun run --watch index.ts",
-		"commands": "bun run register-commands.ts",
 		"start": "NODE_ENV=production bun run index.ts"
 	},
 	"devDependencies": {

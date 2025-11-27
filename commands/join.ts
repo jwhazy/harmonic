@@ -1,7 +1,7 @@
-import { SlashCommandBuilder } from "discord.js";
 import { joinVoiceChannel } from "@discordjs/voice";
-import type { Command } from "../types";
-import env from "../env";
+import { SlashCommandBuilder } from "discord.js";
+import env from "../utils/env";
+import type { Command } from "../utils/types";
 
 export const join = {
 	data: new SlashCommandBuilder()

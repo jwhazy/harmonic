@@ -1,8 +1,8 @@
-import { Client, Events, Collection } from "discord.js";
-import env from "./env";
-import commands from "./commands";
 import { AudioPlayer, AudioPlayerStatus } from "@discordjs/voice";
+import { Client, Collection, Events } from "discord.js";
+import commands from "./commands";
 import { playNext, queue } from "./queue";
+import env from "./utils/env";
 
 export const client = new Client({
 	intents: [
