@@ -6,7 +6,7 @@ import { ZodError, z } from "zod";
 import { add, playNext, queue } from "../queue";
 import env from "../utils/env";
 import type { Command } from "../utils/types";
-import { downloadAudio, getSongInfo } from "../yt-dlp/api";
+import { downloadAudio, getAudioInfo } from "../yt-dlp/api";
 
 export const play = {
 	data: new SlashCommandBuilder()
@@ -43,7 +43,7 @@ export const play = {
 
 			const audioDir = path.join(process.cwd(), "audios");
 
-			let { author, title, videoId, filePath } = await getSongInfo(url);
+			let { author, title, videoId, filePath } = await getAudioInfo(url);
 
 			if (filePath) {
 				interaction.editReply(

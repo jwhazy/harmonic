@@ -2,10 +2,19 @@ import { env } from "bun";
 import { z } from "zod";
 
 /**
- *  **Environment variables schema validation**
+ * **Environment variables schema validation**
  *
- *  To use these variables assign them (with the same name) in .env with the usual syntax
- *  They will autopopulate with the correct type and will throw errors if something is missing.
+ * To use these variables assign them (with the same name) in .env with the usual syntax
+ * They will autopopulate with the correct type and will throw errors if something is missing.
+ *
+ * For emojis they must be in format:
+ *
+ * <a:loading:EMOJI_ID_HERE> for animated emojis
+ *
+ * <:success:EMOJI_ID_HERE> for static emojis
+ *
+ * You configure the emojis in the bot settings on the developer portal.
+ * You can NOT use emojis from servers.
  */
 const envSchema = z.object({
 	TOKEN: z.string(),

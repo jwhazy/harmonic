@@ -14,7 +14,7 @@ export type Command = {
 declare module "discord.js" {
 	interface Client {
 		commands: Collection<string, Command>;
-		connection: VoiceConnection | undefined;
+		connection?: VoiceConnection;
 		player: AudioPlayer;
 		autoDisconnectTimeout?: NodeJS.Timeout;
 	}

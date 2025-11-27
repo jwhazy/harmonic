@@ -1,24 +1,26 @@
 import { AudioPlayer, AudioPlayerStatus } from "@discordjs/voice";
-import { Client, Collection, Events } from "discord.js";
+import { Client, Collection, Events, GatewayIntentBits } from "discord.js";
 import commands from "./commands";
 import { playNext, queue } from "./queue";
 import env from "./utils/env";
 
+console.log("Starting harmonic...");
+
 export const client = new Client({
 	intents: [
-		1, 2, 4, 4, 8, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384,
-		32768, 65536, 1048576, 2097152, 16777216, 33554432,
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildVoiceStates,
+		GatewayIntentBits.GuildExpressions,
+		GatewayIntentBits.GuildMessageReactions,
 	],
 });
 
 client.once(Events.ClientReady, async (client) => {
-	console.log(`Ready! Logged in as ${client.user.tag}`);
-
+	// Map commands to client
 	client.commands = new Collection(
 		commands.map((command) => [command.data.name, command]),
 	);
 
-	client.connection = undefined;
 	client.player = new AudioPlayer();
 
 	client.player.on(AudioPlayerStatus.Idle, () => {
@@ -28,6 +30,7 @@ client.once(Events.ClientReady, async (client) => {
 
 		if (nextUrl) {
 			console.log(`Now playing: ${nextUrl}`);
+
 			if (client.autoDisconnectTimeout) {
 				clearTimeout(client.autoDisconnectTimeout);
 				client.autoDisconnectTimeout = undefined;
@@ -36,6 +39,8 @@ client.once(Events.ClientReady, async (client) => {
 			if (client.autoDisconnectTimeout) {
 				clearTimeout(client.autoDisconnectTimeout);
 			}
+
+			// Disconnect after 5 minutes of inactivity
 			client.autoDisconnectTimeout = setTimeout(
 				() => {
 					if (client.connection) {
@@ -56,22 +61,29 @@ client.once(Events.ClientReady, async (client) => {
 		],
 		status: "online",
 	});
+
+	console.log(`Ready! Logged in as ${client.user.tag}`);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+	// Do nothing unless we are a command
 	if (!interaction.isChatInputCommand()) return;
 
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
+		// This should rarely happen unless you have deleted commands without reregistering.
 		console.error(`No command matching ${interaction.commandName} was found.`);
+
 		await interaction.reply({
 			content: `${env.FAIL_EMOJI} There was an error while executing this command!`,
 		});
+
 		return;
 	}
 
 	try {
+		// Acknowledge interaction in UI and allow more time to process
 		await interaction.deferReply();
 
 		await command.execute(interaction);

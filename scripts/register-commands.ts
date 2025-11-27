@@ -2,6 +2,10 @@ import { REST, Routes } from "discord.js";
 import { commandData } from "../commands";
 import env from "../utils/env";
 
+/**
+ * Run `bun run commands`, after every new command added.
+ */
+
 const rest = new REST().setToken(env.TOKEN);
 
 try {
