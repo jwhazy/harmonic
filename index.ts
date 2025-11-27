@@ -1,7 +1,6 @@
 import { Client, Events, Collection } from "discord.js";
 import env from "./env";
 import commands from "./commands";
-import { Cobalt } from "./cobalt/api";
 import { AudioPlayer, AudioPlayerStatus } from "@discordjs/voice";
 import { playNext, queue } from "./queue";
 
