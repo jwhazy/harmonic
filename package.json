@@ -4,6 +4,7 @@
 	"version": "3.0.0",
 	"type": "module",
 	"scripts": {
+		"build": "NODE_ENV=production bun build --target=bun index.ts --env=disable --compile --outfile dist/harmonic",
 		"commands": "bun run scripts/register-commands.ts",
 		"deps": "bun run scripts/dependency-checks.ts",
 		"dev": "bun run --watch index.ts",
