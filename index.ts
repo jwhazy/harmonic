@@ -4,7 +4,7 @@ import commands from "./commands";
 import { playNext, queue } from "./queue";
 import env from "./utils/env";
 
-console.log("Starting harmonic...");
+console.log("Starting Harmonic...");
 
 export const client = new Client({
 	intents: [
